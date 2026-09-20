@@ -41,20 +41,15 @@ if(display) {
   const canvas=document.querySelector('#canvas')
   const states=new Map(passages.flat().map(p=>[p.id,{id:p.id,x:.5,y:.5,active:false,removed:false,placed:false}]))
   const nodes=new Map()
-  const history=[]
   const edge=document.querySelector('#edge')
-  const restore=document.querySelector('#restore')
-  let chapter=0,drag=null,lastAction=Date.now(),sending=null
+  let drag=null,lastAction=Date.now(),sending=null
   const snapshot=()=>Array.from(states.values()).map(({id,x,y,active,removed})=>({id,x,y,active,removed}))
   function publish(immediate=false) {
     lastAction=Date.now()
     if(immediate){clearTimeout(sending);sending=null;network?.publish(snapshot());return}
     if(!sending)sending=setTimeout(()=>{sending=null;network?.publish(snapshot())},40)
   }
-  network=connectScreen({display:false,room,getState:snapshot,onStatus:(connected,message)=>{
-    const el=document.querySelector('#connection');el.textContent=connected?'스크린 연결됨':'스크린 대기 중';el.classList.toggle('connected',connected)
-    document.querySelector('#connection-detail').textContent=message
-  }})
+  network=connectScreen({display:false,room,getState:snapshot})
   function updateNode(id) {
     const state=states.get(id),el=nodes.get(id);if(!el)return
     el.style.left=`${state.x*100}%`;el.style.top=`${state.y*100}%`
@@ -63,20 +58,33 @@ if(display) {
   }
   function layout() {
     const rect=canvas.getBoundingClientRect()
+    if(!rect.width||!rect.height)return
     const els=[...nodes.values()]
-    const heights=els.map(el=>el.offsetHeight)
-    const total=heights.reduce((a,b)=>a+b,0)
-    const gap=Math.max(4,Math.min(24,(rect.height-total)/Math.max(1,els.length+1)))
-    let y=Math.max(12,(rect.height-total-gap*(els.length-1))/2)
+    const columns=rect.width>rect.height*1.15?3:2
+    const gutter=18, width=(rect.width-gutter*(columns-1))/columns
+    els.forEach(el=>{el.style.width=`${width}px`;el.style.maxWidth='none'})
+    let positions=[],bottoms=[]
+    // Measure all sentences together, so no paragraph requires another screen.
+    for(let font=Math.max(14,Math.min(19,rect.width/52));font>=10;font-=.5) {
+      canvas.style.setProperty('--sentence-size',`${font}px`)
+      bottoms=Array(columns).fill(10);positions=[]
+      for(const el of els) {
+        const column=bottoms.indexOf(Math.min(...bottoms)),height=el.offsetHeight
+        positions.push({x:(column*(width+gutter)+width/2)/rect.width,y:(bottoms[column]+height/2)/rect.height})
+        bottoms[column]+=height+8
+      }
+      if(Math.max(...bottoms)<=rect.height-10)break
+    }
+    const spare=Math.max(0,(rect.height-Math.max(...bottoms))/2)
     els.forEach((el,i)=>{
       const state=states.get(el.dataset.id)
-      if(!state.placed){state.x=.5+Math.sin(i*1.7)*.045;state.y=clamp((y+heights[i]/2)/rect.height,.03,.97)}
-      y+=heights[i]+gap;updateNode(state.id)
+      if(!state.placed){state.x=positions[i].x;state.y=positions[i].y+spare/rect.height}
+      updateNode(state.id)
     })
   }
-  function renderChapter() {
+  function renderField() {
     nodes.clear();canvas.replaceChildren()
-    passages[chapter].forEach(p=>{
+    passages.flat().forEach(p=>{
       const el=document.createElement('button');el.type='button';el.className='fragment';el.dataset.id=p.id;el.textContent=p.text;el.setAttribute('aria-label',p.text)
       el.addEventListener('pointerdown',event=>beginDrag(event,p.id))
       el.addEventListener('pointermove',moveDrag)
@@ -90,8 +98,6 @@ if(display) {
       })
       canvas.append(el);nodes.set(p.id,el)
     })
-    document.querySelector('#chapter').textContent=`${String(chapter+1).padStart(2,'0')} / 05`
-    document.querySelector('#prev').disabled=chapter===0;document.querySelector('#next').disabled=chapter===4
     layout()
   }
   function outside(event){return event.clientX<24||event.clientX>innerWidth-24||event.clientY<35||event.clientY>innerHeight-45}
@@ -114,8 +120,8 @@ if(display) {
   }
   function remove(id) {
     const state=states.get(id);if(state.removed)return
-    history.push({...state});state.removed=true;state.active=false
-    updateNode(id);restore.disabled=false;restore.textContent=`되돌리기 ${history.length}`
+    state.removed=true;state.active=false
+    updateNode(id)
   }
   function clearDrag() {
     if(drag)nodes.get(drag.id)?.classList.remove('dragging','leaving')
@@ -133,21 +139,10 @@ if(display) {
     if(!drag||event.pointerId!==drag.pointer)return
     Object.assign(states.get(drag.id),drag.original);updateNode(drag.id);clearDrag();publish(true)
   }
-  document.querySelector('#prev').onclick=()=>{chapter--;renderChapter();lastAction=Date.now()}
-  document.querySelector('#next').onclick=()=>{chapter++;renderChapter();lastAction=Date.now()}
-  restore.onclick=()=>{const previous=history.pop();if(!previous)return;Object.assign(states.get(previous.id),previous,{removed:false,placed:false,active:false});chapter=byId.get(previous.id).chapter;renderChapter();restore.disabled=!history.length;restore.textContent=history.length?`되돌리기 ${history.length}`:'되돌리기';publish(true)}
-  function reset(){clearDrag();states.forEach(s=>Object.assign(s,{active:false,removed:false,placed:false}));history.length=0;chapter=0;restore.disabled=true;restore.textContent='되돌리기';renderChapter();publish(true)}
-  document.querySelector('#reset').onclick=reset
-  document.querySelector('#fullscreen').onclick=()=>{document.documentElement.requestFullscreen?.().catch(()=>{})}
-  const help=document.querySelector('#help')
-  document.querySelector('#connection').onclick=()=>help.showModal()
-  document.querySelector('#room').value=room
-  const screenUrl=new URL(['localhost','127.0.0.1'].includes(location.hostname)?'http://127.0.0.1:5174/video/index.html':'/rfsinopale/video/',location.origin);screenUrl.searchParams.set('room',room)
-  document.querySelector('#screen-link').href=screenUrl.href
-  document.querySelector('#room-form').onsubmit=event=>{event.preventDefault();const url=new URL(location.href);url.searchParams.set('room',document.querySelector('#room').value);location.href=url.href}
+  function reset(){clearDrag();states.forEach(s=>Object.assign(s,{active:false,removed:false,placed:false}));renderField();publish(true)}
   new ResizeObserver(()=>{layout();network?.publish(snapshot())}).observe(canvas)
-  setInterval(()=>{if(Date.now()-lastAction>90000&&!drag&&!help.open)reset()},1000)
-  renderChapter()
+  setInterval(()=>{if(Date.now()-lastAction>90000&&!drag)reset()},1000)
+  renderField()
 }
 window.addEventListener('pagehide',()=>network?.close())
 

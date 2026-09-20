@@ -20,3 +20,12 @@ dialog{width:min(440px,90vw);border:1px solid #32414b;background:#0b131c;color:#
 #tablet .wordmark-by,#tablet #hint{color:#bacdce}
 #tablet footer,#tablet #connection{color:#c4d6d7}
 #tablet #connection.connected{color:#baffdf}
+
+/* One continuous sea: only the artwork title and all draggable sentences. */
+#tablet{padding:max(18px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
+#tablet header{min-height:34px;flex-shrink:0;justify-content:center}
+.wordmark{margin:0;font-size:14px;font-weight:400;letter-spacing:.13em;color:#edf4ed}
+#canvas{--sentence-size:17px}
+#tablet .fragment{font-size:var(--sentence-size);line-height:1.55;padding:5px 7px;letter-spacing:.01em}
+#edge{padding:0}
+@media(max-width:700px){#tablet{padding:12px}#tablet header{min-height:30px}.wordmark{font-size:12px}#tablet .fragment{padding:4px}}
