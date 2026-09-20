@@ -28,6 +28,16 @@ let network
 if(display) {
   network=connectScreen({display:true,room,onState:renderLayers})
 } else {
+  // Load the sea only on the tablet, never in the transparent projection iframe.
+  const ocean=document.querySelector('#ocean')
+  ocean.muted=true
+  ocean.poster=new URL('./assets/ocean-aerial-poster.jpg',import.meta.url).href
+  ocean.src=new URL('./assets/ocean-aerial-loop.mp4',import.meta.url).href
+  const playOcean=()=>{if(ocean.paused&&!document.hidden)ocean.play().catch(()=>{})}
+  playOcean()
+  // iPad power-saving policies can defer autoplay until the first touch.
+  document.addEventListener('pointerdown',playOcean,{passive:true})
+  document.addEventListener('visibilitychange',()=>document.hidden?ocean.pause():playOcean())
   const canvas=document.querySelector('#canvas')
   const states=new Map(passages.flat().map(p=>[p.id,{id:p.id,x:.5,y:.5,active:false,removed:false,placed:false}]))
   const nodes=new Map()

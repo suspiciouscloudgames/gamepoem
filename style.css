@@ -7,3 +7,16 @@ dialog{width:min(440px,90vw);border:1px solid #32414b;background:#0b131c;color:#
 #layers{display:none}.display,.display body{background:transparent!important}.display #tablet{display:none}.display #layers{display:block;position:fixed;inset:0;pointer-events:none;overflow:hidden}.layer{position:absolute;left:50%;top:50%;width:max-content;max-width:65%;padding:16px 28px;font-size:clamp(18px,2.6vw,42px);line-height:1.7;word-break:keep-all;text-align:left;font-weight:400;letter-spacing:.07em;color:#f0fff6;text-shadow:0 2px 6px #000,0 0 30px #8fffff33;background:radial-gradient(ellipse,#03201d80,transparent 72%);transform:translate(-50%,-50%);transition:opacity 1.4s,filter 1.4s;opacity:0;filter:blur(7px)}.layer.visible{opacity:.87;filter:blur(0)}.layer:nth-child(3n+2){color:#c1e7f4}.layer:nth-child(3n){color:#efe7cd}.layer-trace{display:block;font-size:.6em;letter-spacing:.14em;opacity:.28;transform:translate(1.3em,.3em)}
 @media(max-width:700px){#tablet{padding:12px 12px 10px}.wordmark-by{display:none}.fragment{font-size:16px;line-height:1.55;max-width:90%;padding:7px 5px}footer{flex-wrap:wrap;gap:0}#hint{order:3;width:100%;margin:0;font-size:12px}.tools{margin-left:auto}#connection{font-size:12px}.layer{max-width:85%;font-size:18px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* A silent, aerial sea stays behind the tablet's draggable sentences. */
+#tablet{position:relative;isolation:isolate}
+.ocean-backdrop{position:fixed;inset:0;z-index:-1;pointer-events:none;background:#123f49}
+#ocean{display:block;width:100%;height:100%;object-fit:cover;object-position:center;filter:saturate(.7) hue-rotate(12deg)}
+.ocean-shade{position:absolute;inset:0;background:linear-gradient(180deg,#03121c94 0%,#03151b50 24%,#03151b50 72%,#03121ca8 100%)}
+#tablet .fragment{color:#e1efed;text-shadow:0 2px 5px #00151cd9,0 0 18px #00151c80}
+#tablet .fragment.active{color:#fffde9;text-shadow:0 2px 5px #00151cd9,0 0 22px #a6ffeb70}
+#tablet .fragment.dragging{color:#fff;text-shadow:0 2px 5px #00151c,0 0 26px #b5ffe888}
+#tablet header,#tablet footer{text-shadow:0 1px 5px #00111d}
+#tablet .wordmark-by,#tablet #hint{color:#bacdce}
+#tablet footer,#tablet #connection{color:#c4d6d7}
+#tablet #connection.connected{color:#baffdf}
