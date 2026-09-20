@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080e14"><title>Game Poem — Loopntale</title>
+<link rel="stylesheet" href="./style.css">
+<script>if(new URLSearchParams(location.search).get('display')==='1')document.documentElement.classList.add('display')</script>
+</head>
+<body>
+<main id="tablet">
+  <header><span class="wordmark">game poem<span class="wordmark-by"> / Loopntale</span></span><button id="connection" aria-label="스크린 연결 상태">스크린 대기 중</button></header>
+  <div id="canvas" aria-label="문장을 누르거나 드래그하는 공간"></div>
+  <div id="edge" aria-hidden="true"><span>놓으면 화면 밖으로 떠납니다</span></div>
+  <footer>
+    <div class="chapter-nav"><button id="prev" aria-label="이전 문단">←</button><span id="chapter" aria-live="polite"></span><button id="next" aria-label="다음 문단">→</button></div>
+    <p id="hint">문장을 누르거나, 천천히 옮겨보세요.</p>
+    <div class="tools"><button id="restore" disabled>되돌리기</button><button id="reset">처음으로</button><button id="fullscreen" aria-label="전체 화면">⛶</button></div>
+  </footer>
+  <dialog id="help"><form method="dialog"><button class="close" aria-label="닫기">×</button></form><h2>스크린 연결</h2><p id="connection-detail"></p><p>같은 전시 코드로 두 페이지를 열어주세요. 화면 밖으로 밀어낸 문장은 되돌릴 수 있습니다.</p><label for="room">전시 코드</label><form id="room-form"><input id="room" maxlength="40" pattern="[a-zA-Z0-9_-]+" required autocomplete="off"><button>연결</button></form><a id="screen-link" target="_blank" rel="noopener">영상 화면 열기 ↗</a></dialog>
+</main>
+<div id="layers" aria-hidden="true"></div>
+<script src="./vendor/peerjs.min.js"></script><script type="module" src="./app.js"></script>
+</body></html>
