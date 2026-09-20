@@ -1,5 +1,5 @@
 import {passages,byId} from './content.js'
-import {connectScreen} from './connection.js'
+import {connectScreen} from './connection.js?v=autolink2'
 const params=new URLSearchParams(location.search)
 const display=params.get('display')==='1'
 const room=/^[a-zA-Z0-9_-]{1,40}$/.test(params.get('room')||'')?params.get('room'):'sinopale'
@@ -139,9 +139,8 @@ if(display) {
     if(!drag||event.pointerId!==drag.pointer)return
     Object.assign(states.get(drag.id),drag.original);updateNode(drag.id);clearDrag();publish(true)
   }
-  function reset(){clearDrag();states.forEach(s=>Object.assign(s,{active:false,removed:false,placed:false}));renderField();publish(true)}
-  new ResizeObserver(()=>{layout();network?.publish(snapshot())}).observe(canvas)
-  setInterval(()=>{if(Date.now()-lastAction>90000&&!drag)reset()},1000)
+  new ResizeObserver(layout).observe(canvas)
+  setInterval(()=>{if(Date.now()-lastAction>90000&&!drag){clearDrag();states.forEach(s=>Object.assign(s,{active:false,removed:false,placed:false}));renderField();lastAction=Date.now()}},1000)
   renderField()
 }
 window.addEventListener('pagehide',()=>network?.close())
