@@ -2,20 +2,24 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="drifting sea">
 <meta name="theme-color" content="#080e14"><title>drifting sea loopntale</title>
-<link rel="stylesheet" href="./style.css?v=ipad8-fill1">
+<link rel="stylesheet" href="./style.css?v=tablet-start1">
 <script>if(new URLSearchParams(location.search).get('display')==='1')document.documentElement.classList.add('display')</script>
 </head>
 <body>
 <main id="tablet">
   <div class="ocean-backdrop" aria-hidden="true">
-    <video id="ocean" muted autoplay loop playsinline preload="auto" disablepictureinpicture tabindex="-1"></video>
+    <video id="ocean" muted loop playsinline preload="auto" disablepictureinpicture tabindex="-1"></video>
     <div class="ocean-shade"></div>
   </div>
   <header><h1 class="wordmark">drifting sea loopntale</h1></header>
+  <div id="tablet-start"><button id="begin" type="button">START</button></div>
   <div id="canvas" aria-label="문장을 누르거나 드래그하는 공간"></div>
   <div id="edge" aria-hidden="true"></div>
 </main>
 <div id="layers" aria-hidden="true"></div>
-<script type="module" src="./app.js?v=ipad8-fill1"></script>
+<script type="module" src="./app.js?v=tablet-start1"></script>
 </body></html>

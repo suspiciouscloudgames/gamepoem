@@ -52,11 +52,20 @@ if(display) {
   ocean.muted=true
   ocean.poster=new URL('./assets/ocean-aerial-poster.jpg',import.meta.url).href
   ocean.src=new URL('./assets/ocean-aerial-loop.mp4',import.meta.url).href
-  const playOcean=()=>{if(ocean.paused&&!document.hidden)ocean.play().catch(()=>{})}
-  playOcean()
+  let started=false
+  const playOcean=()=>{if(started&&ocean.paused&&!document.hidden)ocean.play().catch(()=>{})}
   // iPad power-saving policies can defer autoplay until the first touch.
   document.addEventListener('pointerdown',playOcean,{passive:true})
   document.addEventListener('visibilitychange',()=>document.hidden?ocean.pause():playOcean())
+  document.querySelector('#begin').addEventListener('click',()=>{
+    const root=document.documentElement
+    // iPad Safari before 16.4 uses the prefixed document fullscreen API.
+    const fullscreen=root.requestFullscreen||root.webkitRequestFullscreen||root.webkitRequestFullScreen
+    if(fullscreen&&!navigator.standalone){try{const result=fullscreen.call(root);result?.catch(()=>{})}catch{}}
+    started=true;ocean.loop=true;ocean.muted=true
+    document.querySelector('#tablet').classList.add('running')
+    ocean.play().catch(()=>{started=false;document.querySelector('#tablet').classList.remove('running')})
+  })
   const canvas=document.querySelector('#canvas')
   const states=new Map(passages.flat().map(p=>[p.id,{id:p.id,x:.5,y:.5,active:false,removed:false,placed:false}]))
   const nodes=new Map()
@@ -166,6 +175,8 @@ if(display) {
   }
   if(typeof ResizeObserver==='function')new ResizeObserver(layout).observe(canvas)
   window.addEventListener('resize',fitViewport)
+  document.addEventListener('fullscreenchange',fitViewport)
+  document.addEventListener('webkitfullscreenchange',fitViewport)
   window.addEventListener('orientationchange',()=>{clearDrag();setTimeout(fitViewport,150)})
   window.visualViewport?.addEventListener('resize',fitViewport)
   fitViewport()
