@@ -32,7 +32,7 @@ async function startConnection(options) {
       new Promise((resolve,reject)=>{
         if(typeof window.Peer==='function'){resolve();return}
         const script=document.createElement('script')
-        script.src=new URL('./vendor/peerjs.min.js',import.meta.url).href
+        script.src=new URL('./vendor/peerjs-ios14.min.js',import.meta.url).href
         script.onload=resolve;script.onerror=reject;document.head.appendChild(script)
       })
     ])
