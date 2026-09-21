@@ -1,9 +1,10 @@
 // Only real gestures publish state. Idle tabs must never erase another tablet.
 export function connectScreen({display,room,onState,onStatus,getState}) {
   const hostId=`gamepoem-v2-screen-${room}`
-  const sender=crypto.randomUUID()
+  const sender=typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function'?crypto.randomUUID():`tablet-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`
   const role=display?'display':'tablet'
-  const channel=typeof BroadcastChannel==='function'?new BroadcastChannel(`gamepoem-v2-${room}`):null
+  let channel=null
+  try{if(typeof BroadcastChannel==='function')channel=new BroadcastChannel(`gamepoem-v2-${room}`)}catch{}
   let peer=null,upstream=null,retry=null,closed=false,generation=0,isHost=false,follower=false
   let lastAck=0,lastUpstreamAck=0,openedAt=0,lastAttempt=0,revision=0,latest=null,localState=null
   const clients=new Set()

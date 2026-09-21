@@ -1,5 +1,4 @@
 import {passages,byId} from './content.js'
-import {connectScreen} from './connection.js?v=autolink2'
 const params=new URLSearchParams(location.search)
 const display=params.get('display')==='1'
 const room=/^[a-zA-Z0-9_-]{1,40}$/.test(params.get('room')||'')?params.get('room'):'sinopale'
@@ -24,9 +23,29 @@ function renderLayers(items) {
   }
   for(const [id,el] of layerNodes) if(!visible.has(id)) el.classList.remove('visible')
 }
-let network
+let network,pendingState,disposed=false
+async function startConnection(options) {
+  // Render the artwork before loading the network library or opening a socket.
+  try {
+    const [transport]=await Promise.all([
+      import('./connection.js?v=ipad8-1'),
+      new Promise((resolve,reject)=>{
+        if(typeof window.Peer==='function'){resolve();return}
+        const script=document.createElement('script')
+        script.src=new URL('./vendor/peerjs.min.js',import.meta.url).href
+        script.onload=resolve;script.onerror=reject;document.head.appendChild(script)
+      })
+    ])
+    if(disposed)return
+    network=transport.connectScreen(options)
+    if(pendingState){network.publish(pendingState);pendingState=null}
+  } catch {
+    document.documentElement.dataset.screenConnection='waiting'
+    if(!disposed)setTimeout(()=>startConnection(options),5000)
+  }
+}
 if(display) {
-  network=connectScreen({display:true,room,onState:renderLayers})
+  startConnection({display:true,room,onState:renderLayers})
 } else {
   // Load the sea only on the tablet, never in the transparent projection iframe.
   const ocean=document.querySelector('#ocean')
@@ -46,10 +65,10 @@ if(display) {
   const snapshot=()=>Array.from(states.values()).map(({id,x,y,active,removed})=>({id,x,y,active,removed}))
   function publish(immediate=false) {
     lastAction=Date.now()
-    if(immediate){clearTimeout(sending);sending=null;network?.publish(snapshot());return}
-    if(!sending)sending=setTimeout(()=>{sending=null;network?.publish(snapshot())},40)
+    if(immediate){clearTimeout(sending);sending=null;sendState();return}
+    if(!sending)sending=setTimeout(()=>{sending=null;sendState()},40)
   }
-  network=connectScreen({display:false,room,getState:snapshot})
+  function sendState(){const items=snapshot();if(network)network.publish(items);else pendingState=items}
   function updateNode(id) {
     const state=states.get(id),el=nodes.get(id);if(!el)return
     el.style.left=`${state.x*100}%`;el.style.top=`${state.y*100}%`
@@ -83,7 +102,7 @@ if(display) {
     })
   }
   function renderField() {
-    nodes.clear();canvas.replaceChildren()
+    nodes.clear();canvas.textContent=''
     passages.flat().forEach(p=>{
       const el=document.createElement('button');el.type='button';el.className='fragment';el.dataset.id=p.id;el.textContent=p.text;el.setAttribute('aria-label',p.text)
       el.addEventListener('pointerdown',event=>beginDrag(event,p.id))
@@ -139,10 +158,21 @@ if(display) {
     if(!drag||event.pointerId!==drag.pointer)return
     Object.assign(states.get(drag.id),drag.original);updateNode(drag.id);clearDrag();publish(true)
   }
-  new ResizeObserver(layout).observe(canvas)
+  function fitViewport(){
+    const viewport=window.visualViewport
+    const height=viewport&&Math.abs(viewport.scale-1)<.01?viewport.height:window.innerHeight
+    document.documentElement.style.setProperty('--viewport-height',`${Math.round(height)}px`)
+    requestAnimationFrame(layout)
+  }
+  if(typeof ResizeObserver==='function')new ResizeObserver(layout).observe(canvas)
+  window.addEventListener('resize',fitViewport)
+  window.addEventListener('orientationchange',()=>{clearDrag();setTimeout(fitViewport,150)})
+  window.visualViewport?.addEventListener('resize',fitViewport)
+  fitViewport()
   setInterval(()=>{if(Date.now()-lastAction>90000&&!drag){clearDrag();states.forEach(s=>Object.assign(s,{active:false,removed:false,placed:false}));renderField();lastAction=Date.now()}},1000)
   renderField()
+  startConnection({display:false,room,getState:snapshot})
 }
-window.addEventListener('pagehide',()=>network?.close())
+window.addEventListener('pagehide',()=>{disposed=true;network?.close()})
 
 window.addEventListener('pageshow',event=>{if(event.persisted)location.reload()})
