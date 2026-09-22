@@ -191,3 +191,62 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media(orientation:landscape){#tablet #poem-composer{left:22%;width:56%;top:10%;height:31%;padding:3% 7% 2%}}
 
 #tablet.at-ending #canvas,#tablet.at-ending #poem-composer{pointer-events:none}
+
+/* The actual Sinop shore is the writing surface. Keep the sea in the same
+   photograph: no tiled water, hard image seams, or illustrated land. */
+#harbor-photo{position:absolute;top:0;left:0;width:100%;height:100%;background:url('./assets/sinop-harbor.jpeg') center center / cover no-repeat}
+#tablet{background:none;box-shadow:none}
+.ocean-backdrop{background:#082a3c}
+.ocean-shade{background:linear-gradient(180deg,#071b2b08 0%,transparent 36%,#05172530 48%,#041c2b12 62%,#02172555 100%)}
+#tablet header{opacity:.8}
+#tablet #poem-composer{top:42%;left:8%;width:84%;height:15%;padding:0 2%;border:0;border-radius:0;background:none;box-shadow:none}
+#poem-lines{padding:4px 0;scrollbar-width:none;-webkit-mask-image:linear-gradient(transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(transparent,#000 9%,#000 91%,transparent)}
+#tablet .poem-line{color:#fff9e9;font-size:clamp(19px,2.8vw,27px);line-height:1.5;min-height:44px;padding:5px 0;text-shadow:0 2px 4px #071522,0 0 12px #071522}
+#tablet #poem-composer.receiving{background:radial-gradient(ellipse at center,#f3e6bd20,transparent 72%)}
+#poem-composer.receiving .poem-line{color:#fffce9}
+#tank-water{background:linear-gradient(180deg,#bad7e60d,#5389a116 45%,#082c451f);border-top:0;box-shadow:none}
+.tank-surface{top:-18px;height:36px;background:linear-gradient(transparent,#c1e3ed20,transparent);box-shadow:none;filter:blur(4px)}
+.tank-depth{background:none}
+#tablet.nearly-full .tank-surface{background:linear-gradient(transparent,#d4e7ea38,transparent)}
+#tablet .fragment{color:#f4f1e7;text-shadow:0 2px 5px #03202f,0 0 10px #03202f}
+@media(orientation:landscape){#tablet #poem-composer{top:42%;left:12%;width:76%;height:16%;padding:0 3%}}
+
+/* A still photographic sea; only the lifted words change at the shoreline. */
+#tank-water{display:none}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  #tablet .floating-phrase,#tablet .poem-line{
+    background-image:linear-gradient(180deg,#fff8dc 0%,#e7f5ee 25%,#add7e4 52%,#72aac8 78%,#6495b8 100%);
+    background-size:100% 220%;background-repeat:no-repeat;
+    background-position:50% var(--surface-position,0%);
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    text-shadow:none;filter:drop-shadow(0 2px 3px #061827) drop-shadow(0 0 6px #06182799);
+  }
+  #tablet .floating-phrase{transition:background-position .12s linear}
+  #tablet .poem-line{--surface-position:0%}
+}
+
+/* Blue-hour photographic grade: cool water with warm harbor lights. */
+#harbor-photo{filter:brightness(.88) contrast(1.08) saturate(.76)}
+.ocean-shade{background:linear-gradient(180deg,rgba(28,38,76,.2) 0%,rgba(64,82,111,.06) 32%,rgba(212,173,118,.07) 48%,rgba(9,43,59,.13) 62%,rgba(3,22,37,.46) 100%)}
+.ocean-backdrop::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;background:radial-gradient(ellipse at 50% 44%,transparent 35%,rgba(5,17,35,.2) 100%)}
+
+/* Keep earlier lines in view as the poem grows upwards from the shore. */
+#tablet .poem-line{font-size:clamp(14px,2.1vw,19px);line-height:1.55;min-height:28px;padding:3px 0}
+#poem-lines{-webkit-mask-image:none;mask-image:none;scrollbar-width:thin;scrollbar-color:#d3e1df55 transparent}
+#poem-lines::-webkit-scrollbar{display:block;width:3px}
+#poem-lines::-webkit-scrollbar-thumb{background:#d3e1df55;border-radius:3px}
+.floating-phrase{transform:translate(-50%,-50%)}
+
+/* Tablet interaction has no scrolling, including long collected poems. */
+#tablet #poem-lines{display:grid;align-content:start;column-gap:12px;height:100%;overflow:hidden;scrollbar-width:none;touch-action:none}
+#tablet #poem-lines::-webkit-scrollbar{display:none}
+#tablet #poem-lines .poem-line{font-size:var(--poem-size,16px);min-height:0;line-height:1.45;padding:2px 0;overflow-wrap:anywhere;word-break:keep-all}
+
+#tablet #poem-lines{grid-auto-rows:min-content;align-items:start}
+
+/* A quiet photographic backdrop lets the poem lead. */
+#harbor-photo{filter:blur(2px) saturate(.48) contrast(.74) brightness(1.08);transform:scale(1.012)}
+.ocean-shade{background:linear-gradient(180deg,rgba(158,177,191,.17) 0%,rgba(125,150,167,.23) 42%,rgba(45,75,93,.2) 63%,rgba(12,39,56,.23) 100%)}
+.ocean-backdrop::after{background:radial-gradient(ellipse at 50% 40%,rgba(50,73,90,.08),rgba(25,47,64,.12) 100%)}
+#tablet #poem-lines .poem-line{background-image:linear-gradient(180deg,#fffdf2 0%,#fff9e9 45%,#d4e9ed 100%);background-size:100% 100%;filter:drop-shadow(0 1px 2px #102736) drop-shadow(0 0 5px #10273680)}

@@ -13,3 +13,7 @@ Used within the Game Poem interactive website. The opening 12 seconds were slowe
 Nanum Myeongjo Regular, NAVER Corporation; font design by FONTRIX.
 Source: https://github.com/google/fonts/tree/main/ofl/nanummyeongjo
 Bundled unmodified with its SIL Open Font License in `fonts/NanumMyeongjo-OFL.txt`.
+
+# Sinop harbor photograph
+
+User-provided `IMG_5356.jpeg`, supplied September 22, 2026. Original photograph used unchanged as the tablet background; framing and text contrast are handled in CSS.

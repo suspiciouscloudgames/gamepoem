@@ -3,12 +3,12 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
   const tablet=document.querySelector('#tablet'),nodes=new Map(),states=new Map(),order=[]
   let drag=null,lastAction=Date.now()
   const available=new Set()
-  let currentCycle=null,lastFilmTime=0,lastProgressAt=0,poemToken=''
-  const water=document.createElement('div');water.id='tank-water';water.setAttribute('aria-hidden','true');water.innerHTML='<div class="tank-surface"></div><div class="tank-depth"></div>'
-  const composer=document.createElement('section');composer.id='poem-composer';composer.setAttribute('aria-label','시를 모으는 바위')
-  composer.innerHTML=`<svg class="poem-rock" viewBox="0 0 800 340" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="rock-tone" x2=".2" y2="1"><stop stop-color="#737f7d"/><stop offset=".35" stop-color="#4d6366"/><stop offset="1" stop-color="#1b373f"/></linearGradient></defs><path d="M36 60L110 24 281 13 401 24 562 10 696 32 763 71 790 145 768 239 713 297 533 325 347 313 192 328 65 280 14 179Z" fill="url(#rock-tone)"/><path d="M36 60L197 51 303 68 424 44 562 49 696 32M65 280L128 206 113 169M713 297L672 242 700 182" fill="none" stroke="#b9c6bd" stroke-opacity=".17" stroke-width="2"/></svg><div id="poem-lines"></div>`
-  tablet.append(water,composer)
+  let currentCycle=null,lastFilmTime=0,poemToken=''
+  const composer=document.createElement('section');composer.id='poem-composer';composer.setAttribute('aria-label','시를 모으는 육지')
+  composer.innerHTML='<div id="poem-lines"></div>'
+  tablet.append(composer)
   const lines=composer.querySelector('#poem-lines')
+  const poemMeasure=document.createElement('canvas').getContext('2d')
   const snapshot=()=>[...Array.from(states.values()).filter(s=>s.active).map(({id,x,y,active,removed,direction,sentAt,energy})=>({id,x,y,active,removed,direction,sentAt,energy})),...(order.length?[{id:'poem',kind:'poem',lines:order.slice(),token:poemToken}]:[])]
   function poemChanged(){poemToken=`${Date.now()}-${Math.random().toString(36).slice(2)}`}
   function publish(){lastAction=Date.now();send(snapshot())}
@@ -29,11 +29,40 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
         if(event.key==='ArrowUp'||event.key==='ArrowDown'){event.preventDefault();const target=clamp(i+(event.key==='ArrowUp'?-1:1),0,order.length-1);order.splice(i,1);order.splice(target,0,id);poemChanged();renderPoem();publish()}
       });lines.append(el)
     })
-    lines.scrollTop=lines.scrollHeight
+    fitPoem()
+  }
+  function fitPoem(){
+    const height=tablet.getBoundingClientRect().height
+    const base=clamp(innerWidth*.021,14,19)
+    // Pack every collected phrase into the visible shore; never create a scroll area.
+    let chosen={columns:1,size:0,height:height*.45}
+    const maxHeight=height*.45
+    for(let columns=1;columns<=4;columns++){
+      const columnWidth=Math.max(20,(lines.clientWidth-12*(columns-1))/columns)
+      for(let size=base;size>=2;size-=.5){
+        poemMeasure.font=`${size}px "Nanum Myeongjo"`
+        const rows=[]
+        order.forEach((id,i)=>{
+          const row=Math.floor(i/columns)
+          const wraps=Math.max(1,Math.ceil(poemMeasure.measureText(states.get(id).text).width/(columnWidth*.85)))
+          rows[row]=Math.max(rows[row]||0,Math.ceil(wraps*size*1.45)+4)
+        })
+        const needed=rows.reduce((sum,n)=>sum+n,0)+8
+        if(needed<=maxHeight){
+          if(size>chosen.size)chosen={columns,size,height:Math.max(height*.15,needed)}
+          break
+        }
+      }
+    }
+    lines.style.gridTemplateColumns=`repeat(${chosen.columns},minmax(0,1fr))`
+    lines.style.setProperty('--poem-size',`${chosen.size}px`)
+    composer.style.height=`${chosen.height}px`
+    composer.style.top=`${height*.57-chosen.height}px`
   }
   function layout(){
     const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return
-    const portrait=rect.height>rect.width,size=portrait?clamp(rect.width/31,19,27):clamp(rect.width/40,19,28)
+    fitPoem()
+    const portrait=rect.height>rect.width,size=portrait?clamp(rect.width/43,14,19):clamp(rect.width/57,14,19)
     for(const [id,el] of nodes){
       el.hidden=!available.has(id)
       const state=states.get(id),p=pilePosition(state.index,portrait)
@@ -53,17 +82,25 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
     const r=event.currentTarget.getBoundingClientRect(),ghost=document.createElement('div')
     ghost.className='floating-phrase';ghost.textContent=states.get(id).text;ghost.style.fontSize=getComputedStyle(event.currentTarget).fontSize
     tablet.append(ghost);ghost.style.left=`${r.left+r.width/2}px`;ghost.style.top=`${r.top+r.height/2}px`
+    tint(ghost,r.top+r.height/2)
     drag={id,inPoem,pointer:event.pointerId,x:event.clientX,y:event.clientY,cx:r.left+r.width/2,cy:r.top+r.height/2,el:event.currentTarget,ghost,moved:false}
     lastAction=Date.now();drag.el.classList.add('held');tablet.classList.add('holding')
+  }
+  // The photographed shoreline is the bottom of the land drop area.
+  // Brighten the upper letters first as a phrase crosses from sea to land.
+  function tint(ghost,y){
+    const shore=composer.getBoundingClientRect().bottom
+    const lift=clamp((shore+120-y)/200,0,1)
+    ghost.style.setProperty('--surface-position',`${100-lift*100}%`)
   }
   function move(event){
     if(!drag||drag.pointer!==event.pointerId)return
     const dx=event.clientX-drag.x,dy=event.clientY-drag.y
     if(Math.hypot(dx,dy)>8)drag.moved=true
     drag.ghost.style.left=`${drag.cx+dx}px`;drag.ghost.style.top=`${drag.cy+dy}px`
+    tint(drag.ghost,drag.cy+dy)
     const over=inside(event,composer);composer.classList.toggle('receiving',over)
     tablet.dataset.dragDirection=over?'poem':direction(event)||''
-    if(over){const r=lines.getBoundingClientRect();if(event.clientY<r.top+35)lines.scrollTop-=10;if(event.clientY>r.bottom-35)lines.scrollTop+=10}
   }
   function inside(event,el){const r=el.getBoundingClientRect();return event.clientX>=r.left&&event.clientX<=r.right&&event.clientY>=r.top&&event.clientY<=r.bottom}
   function finishDrag(){const d=drag;if(!d)return null;drag=null;d.el.classList.remove('held');tablet.classList.remove('holding');delete tablet.dataset.dragDirection;composer.classList.remove('receiving');return d}
@@ -83,7 +120,7 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
       if(!d.inPoem)add(d.id)
       else{
         const remaining=order.filter(id=>id!==d.id)
-        let at=remaining.findIndex(id=>{const box=lines.querySelector(`[data-id="${id}"]`).getBoundingClientRect();return event.clientY<box.top+box.height/2})
+        let at=remaining.findIndex(id=>{const box=lines.querySelector(`[data-id="${id}"]`).getBoundingClientRect();return event.clientY<box.top||(event.clientY<=box.bottom&&event.clientX<box.left+box.width/2)})
         if(at<0)at=remaining.length
         remaining.splice(at,0,d.id);order.splice(0,order.length,...remaining);poemChanged();renderPoem();publish()
       }
@@ -95,7 +132,6 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
     }
   }
   function reset(shouldPublish=true){available.clear();canvas.dataset.arrived='0';cancel();order.length=0;states.forEach(s=>Object.assign(s,{active:false,removed:false,direction:null,sentAt:0}));renderPoem();layout();if(shouldPublish)publish()}
-  lines.addEventListener('scroll',()=>{lastAction=Date.now()},{passive:true})
   canvas.textContent=''
   fragments.forEach((p,index)=>{
     states.set(p.id,{id:p.id,index,text:p.text,x:.5,y:.5,active:false,removed:false,direction:null,sentAt:0,energy:.5})
@@ -119,7 +155,6 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
   function fit(){const v=window.visualViewport;document.documentElement.style.setProperty('--viewport-height',`${Math.round(v&&Math.abs(v.scale-1)<.01?v.height:innerHeight)}px`);requestAnimationFrame(layout)}
   if(typeof ResizeObserver==='function')new ResizeObserver(layout).observe(canvas)
   window.addEventListener('resize',fit);window.visualViewport?.addEventListener('resize',fit);document.addEventListener('fullscreenchange',fit);document.addEventListener('webkitfullscreenchange',fit);window.addEventListener('orientationchange',()=>{cancel();setTimeout(fit,150)})
-  setInterval(()=>{if(lastProgressAt&&Date.now()-lastProgressAt>6000)tablet.classList.add('tide-stale')},2000)
   if(document.fonts)document.fonts.load('24px "Nanum Myeongjo"').then(()=>layout()).catch(()=>{})
-  fit();renderPoem();startConnection({display:false,room,getState:snapshot,onProgress(data){if(data.phase==='ending')cancel();lastProgressAt=Date.now();updateArrivals(data);tablet.style.setProperty('--water-level',String(data.progress));tablet.classList.toggle('nearly-full',data.progress>=.9);tablet.classList.toggle('at-ending',data.phase==='ending');tablet.classList.remove('tide-stale');composer.dataset.filmProgress=String(data.progress)},onControl(data){if(data.token===poemToken)reset()}})
+  fit();renderPoem();startConnection({display:false,room,getState:snapshot,onProgress(data){if(data.phase==='ending')cancel();updateArrivals(data);tablet.classList.toggle('at-ending',data.phase==='ending');composer.dataset.filmProgress=String(data.progress)},onControl(data){if(data.token===poemToken)reset()}})
 }
