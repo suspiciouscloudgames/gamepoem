@@ -15,7 +15,7 @@ export function connectPoemEnding({byId,complete,progress}){
     const poem=latest&&{...latest,lines:latest.lines.slice()}
     if(!poem?.lines.length){reply({type:'poem-ending',duration:0});return}
     showing=true;paper.textContent=''
-    poem.lines.forEach(id=>{const line=document.createElement('p');line.textContent=byId.get(id).text;paper.append(line)})
+    poem.lines.forEach(id=>{const line=document.createElement('p');line.textContent=poem.texts?.[id]??byId.get(id).text;paper.append(line)})
     const duration=20000
     ending.hidden=false;paper.scrollTop=0
     reply({type:'poem-ending',duration})
@@ -24,5 +24,15 @@ export function connectPoemEnding({byId,complete,progress}){
     requestAnimationFrame(scroll)
     setTimeout(()=>{showing=false;ending.hidden=true;complete(poem.token);if(latest?.token===poem.token)latest=null;reply({type:'poem-finished'})},duration)
   })
-  return {set(items){const p=items.find(item=>item.kind==='poem');latest=p&&typeof p.token==='string'&&Array.isArray(p.lines)?{token:p.token,lines:p.lines.filter(id=>byId.has(id)).slice(0,132)}:null}}
+  return {set(items){
+    const p=items.find(item=>item.kind==='poem')
+    if(!p||typeof p.token!=='string'||!Array.isArray(p.lines)){latest=null;return}
+    const texts=Object.create(null)
+    for(const fill of Array.isArray(p.fills)?p.fills.slice(0,132):[]){
+      if(!fill)continue
+      const sentence=byId.get(fill.sentenceId),answer=byId.get(fill.answerId)
+      if(sentence?.kind==='sentence'&&answer?.kind==='answer'&&(!sentence.accepts||sentence.accepts.includes(answer.id)))texts[fill.sentenceId]=sentence.before+answer.text+sentence.after
+    }
+    latest={token:p.token,lines:p.lines.filter(id=>byId.has(id)).slice(0,132),texts}
+  }}
 }
