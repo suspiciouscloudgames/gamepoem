@@ -1,34 +1,40 @@
-import {passages,byId} from './content.js'
+import {fragments,fragmentById as byId} from './content.js?v=phrase1'
+import {pilePosition,directionAt,isEmission,clamp} from './interaction.js?v=phrase1'
+import {createSeaEffects} from './effects.js?v=phrase1'
 const params=new URLSearchParams(location.search)
 const display=params.get('display')==='1'
 const room=/^[a-zA-Z0-9_-]{1,40}$/.test(params.get('room')||'')?params.get('room'):'sinopale'
-const clamp=(value,min,max)=>Math.max(min,Math.min(max,value))
 const layerRoot=document.querySelector('#layers')
 const layerNodes=new Map()
-function renderLayers(items) {
+let displayedItems=[]
+let effects=null
+function refreshLayerText() {
   const visible=new Set()
-  for(const item of items) {
-    if(!item || !byId.has(item.id) || item.active!==true || item.removed===true || !Number.isFinite(item.x)||!Number.isFinite(item.y)) continue
+  for(const item of displayedItems) {
+    const emitted=isEmission(item)
+    if(!item.active || (item.removed&&!emitted) || (item.direction&&!emitted))continue
     visible.add(item.id)
     let el=layerNodes.get(item.id)
-    if(!el) {
-      el=document.createElement('div');el.className='layer';el.dataset.id=item.id
-      const text=document.createElement('span');text.textContent=byId.get(item.id).text;el.append(text)
-      layerRoot.append(el);layerNodes.set(item.id,el)
-    }
-    el.style.left=`${clamp(item.x,.06,.94)*100}%`
-    // Keep the film's bilingual subtitle band unobstructed.
-    el.style.top=`${(0.08+clamp(item.y,0,1)*.64)*100}%`
-    requestAnimationFrame(()=>el.classList.add('visible'))
+    if(!el){el=document.createElement('div');el.className='layer';el.dataset.id=item.id;el.textContent=byId.get(item.id).text;layerRoot.append(el);layerNodes.set(item.id,el)}
+    el.className=`layer visible${emitted?' direction-'+item.direction:''}`
+    const x=emitted?{up:.5,down:.5,left:.3,right:.7}[item.direction]:clamp(item.x,.15,.85)
+    const y=emitted?{up:.22,down:.65,left:.4,right:.42}[item.direction]:.08+clamp(item.y,0,1)*.6
+    el.style.left=`${x*100}%`;el.style.top=`${y*100}%`
+    if(emitted&&el.dataset.sentAt!==String(item.sentAt)){el.dataset.sentAt=String(item.sentAt);el.style.setProperty('--phase',`${Math.max(0,Date.now()-item.sentAt)/1000}s`)}
   }
-  for(const [id,el] of layerNodes) if(!visible.has(id)) el.classList.remove('visible')
+  for(const [id,el] of layerNodes)if(!visible.has(id))el.className='layer'
+}
+function renderLayers(items) {
+  displayedItems=items.filter(item=>item&&byId.has(item.id)&&Number.isFinite(item.x)&&Number.isFinite(item.y))
+  effects?.set(displayedItems.filter(item=>isEmission(item)).map(item=>({...item,text:byId.get(item.id).text})))
+  refreshLayerText()
 }
 let network,pendingState,disposed=false
 async function startConnection(options) {
   // Render the artwork before loading the network library or opening a socket.
   try {
     const [transport]=await Promise.all([
-      import('./connection.js?v=ipad8-1'),
+      import('./connection.js?v=phrase1'),
       new Promise((resolve,reject)=>{
         if(typeof window.Peer==='function'){resolve();return}
         const script=document.createElement('script')
@@ -45,6 +51,8 @@ async function startConnection(options) {
   }
 }
 if(display) {
+  effects=createSeaEffects(layerRoot)
+  setInterval(refreshLayerText,250)
   startConnection({display:true,room,onState:renderLayers})
 } else {
   // Load the sea only on the tablet, never in the transparent projection iframe.
@@ -67,11 +75,11 @@ if(display) {
     ocean.play().catch(()=>{started=false;document.querySelector('#tablet').classList.remove('running')})
   })
   const canvas=document.querySelector('#canvas')
-  const states=new Map(passages.flat().map(p=>[p.id,{id:p.id,x:.5,y:.5,active:false,removed:false,placed:false}]))
+  const states=new Map(fragments.map((p,index)=>[p.id,{id:p.id,index,x:.5,y:.5,active:false,removed:false,placed:false,direction:null,sentAt:0,energy:.5}]))
   const nodes=new Map()
   const edge=document.querySelector('#edge')
   let drag=null,lastAction=Date.now(),sending=null
-  const snapshot=()=>Array.from(states.values()).map(({id,x,y,active,removed})=>({id,x,y,active,removed}))
+  const snapshot=()=>Array.from(states.values()).filter(s=>s.active).map(({id,x,y,active,removed,direction,sentAt,energy})=>({id,x,y,active,removed,direction,sentAt,energy}))
   function publish(immediate=false) {
     lastAction=Date.now()
     if(immediate){clearTimeout(sending);sending=null;sendState();return}
@@ -85,34 +93,22 @@ if(display) {
     el.setAttribute('aria-pressed',String(state.active));el.tabIndex=state.removed?-1:0
   }
   function layout() {
-    const rect=canvas.getBoundingClientRect()
-    if(!rect.width||!rect.height)return
-    const els=[...nodes.values()]
-    const columns=rect.width>rect.height*1.15?3:2
-    const gutter=18, width=(rect.width-gutter*(columns-1))/columns
-    els.forEach(el=>{el.style.width=`${width}px`;el.style.maxWidth='none'})
-    let positions=[],bottoms=[]
-    // Measure all sentences together, so no paragraph requires another screen.
-    for(let font=Math.max(14,Math.min(19,rect.width/52));font>=10;font-=.5) {
-      canvas.style.setProperty('--sentence-size',`${font}px`)
-      bottoms=Array(columns).fill(10);positions=[]
-      for(const el of els) {
-        const column=bottoms.indexOf(Math.min(...bottoms)),height=el.offsetHeight
-        positions.push({x:(column*(width+gutter)+width/2)/rect.width,y:(bottoms[column]+height/2)/rect.height})
-        bottoms[column]+=height+8
-      }
-      if(Math.max(...bottoms)<=rect.height-10)break
+    const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return
+    canvas.style.setProperty('--sentence-size',`${clamp(rect.width/40,19,28)}px`)
+    for(const [id,el] of nodes){
+      const state=states.get(id),pile=pilePosition(state.index)
+      if(!state.placed){state.x=pile.x;state.y=pile.y}
+      el.style.setProperty('--tilt',`${pile.angle}deg`)
+      el.style.setProperty('--depth-scale',pile.scale)
+      el.style.setProperty('--lean',`${(pile.depth-50)*.35}deg`)
+      el.style.setProperty('--depth-opacity',.62+pile.depth*.0038)
+      el.style.zIndex=String(pile.depth)
+      updateNode(id)
     }
-    const spare=Math.max(0,(rect.height-Math.max(...bottoms))/2)
-    els.forEach((el,i)=>{
-      const state=states.get(el.dataset.id)
-      if(!state.placed){state.x=positions[i].x;state.y=positions[i].y+spare/rect.height}
-      updateNode(state.id)
-    })
   }
   function renderField() {
     nodes.clear();canvas.textContent=''
-    passages.flat().forEach(p=>{
+    fragments.forEach(p=>{
       const el=document.createElement('button');el.type='button';el.className='fragment';el.dataset.id=p.id;el.textContent=p.text;el.setAttribute('aria-label',p.text)
       el.addEventListener('pointerdown',event=>beginDrag(event,p.id))
       el.addEventListener('pointermove',moveDrag)
@@ -120,19 +116,26 @@ if(display) {
       el.addEventListener('pointercancel',cancelDrag)
       el.addEventListener('keydown',event=>{
         const state=states.get(p.id)
-        if(event.key==='Enter'||event.key===' '){event.preventDefault();state.active=!state.active;updateNode(p.id);publish(true)}
+        if(event.key==='Enter'||event.key===' '){event.preventDefault();state.active=!state.active;state.direction=null;state.sentAt=0;updateNode(p.id);publish(true)}
         if(event.key==='Delete'||event.key==='Backspace'){event.preventDefault();remove(p.id);publish(true)}
-        if(event.key.startsWith('Arrow')){event.preventDefault();state.x=clamp(state.x+(event.key==='ArrowRight'?.025:event.key==='ArrowLeft'?-.025:0),0,1);state.y=clamp(state.y+(event.key==='ArrowDown'?.025:event.key==='ArrowUp'?-.025:0),0,1);state.placed=true;state.active=true;updateNode(p.id);publish(true)}
+        if(event.key.startsWith('Arrow')){event.preventDefault();emit(p.id,{ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right'}[event.key]);publish(true)}
       })
       canvas.append(el);nodes.set(p.id,el)
     })
     layout()
   }
-  function outside(event){return event.clientX<24||event.clientX>innerWidth-24||event.clientY<35||event.clientY>innerHeight-45}
+  function targetDirection(event){const rect=canvas.getBoundingClientRect();return directionAt((event.clientX-rect.left)/rect.width,(event.clientY-rect.top)/rect.height)}
+  function emit(id,direction){
+    if(!direction)return
+    const state=states.get(id)
+    state.direction=direction;state.sentAt=Date.now();state.active=true;state.removed=true;state.placed=true
+    updateNode(id)
+    document.querySelector('#tablet').dataset.lastDirection=direction
+  }
   function beginDrag(event,id) {
     if(drag||event.button!==0)return
     const state=states.get(id);if(state.removed)return
-    event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId)
+    event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);event.currentTarget.style.zIndex='1000'
     drag={id,pointer:event.pointerId,sx:event.clientX,sy:event.clientY,original:{...state},moved:false}
     lastAction=Date.now();event.currentTarget.classList.add('dragging')
   }
@@ -143,8 +146,10 @@ if(display) {
     if(!drag.moved)return
     state.x=drag.original.x+(event.clientX-drag.sx)/rect.width
     state.y=drag.original.y+(event.clientY-drag.sy)/rect.height
-    state.active=true;state.placed=true
-    updateNode(drag.id);nodes.get(drag.id).classList.toggle('leaving',outside(event));edge.classList.toggle('visible',outside(event));publish()
+    state.active=true;state.placed=true;state.direction=null;state.sentAt=0
+    state.energy=clamp(Math.hypot(event.clientX-drag.sx,event.clientY-drag.sy)/Math.max(rect.width,rect.height),.2,1)
+    const direction=targetDirection(event)
+    updateNode(drag.id);nodes.get(drag.id).classList.toggle('leaving',!!direction);edge.classList.toggle('visible',!!direction);edge.dataset.direction=direction||'';publish()
   }
   function remove(id) {
     const state=states.get(id);if(state.removed)return
@@ -153,13 +158,13 @@ if(display) {
   }
   function clearDrag() {
     if(drag)nodes.get(drag.id)?.classList.remove('dragging','leaving')
-    drag=null;edge.classList.remove('visible')
+    drag=null;edge.classList.remove('visible');delete edge.dataset.direction
   }
   function endDrag(event) {
     if(!drag||event.pointerId!==drag.pointer)return
     const state=states.get(drag.id)
-    if(drag.moved&&outside(event))remove(drag.id)
-    else if(!drag.moved){state.active=!state.active;updateNode(drag.id)}
+    if(drag.moved&&targetDirection(event))emit(drag.id,targetDirection(event))
+    else if(!drag.moved){state.active=!state.active;state.direction=null;state.sentAt=0;updateNode(drag.id)}
     else {state.x=clamp(state.x,.05,.95);state.y=clamp(state.y,.04,.96);updateNode(drag.id)}
     clearDrag();publish(true)
   }
@@ -180,7 +185,7 @@ if(display) {
   window.addEventListener('orientationchange',()=>{clearDrag();setTimeout(fitViewport,150)})
   window.visualViewport?.addEventListener('resize',fitViewport)
   fitViewport()
-  setInterval(()=>{if(Date.now()-lastAction>90000&&!drag){clearDrag();states.forEach(s=>Object.assign(s,{active:false,removed:false,placed:false}));renderField();lastAction=Date.now()}},1000)
+  setInterval(()=>{if(Date.now()-lastAction>90000&&!drag){clearDrag();states.forEach(s=>Object.assign(s,{active:false,removed:false,placed:false,direction:null,sentAt:0}));renderField();lastAction=Date.now()}},1000)
   renderField()
   startConnection({display:false,room,getState:snapshot})
 }
