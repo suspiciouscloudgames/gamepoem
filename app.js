@@ -1,5 +1,5 @@
 import {fragments,fragmentById as byId} from './content.js?v=phrase1'
-import {pilePosition,directionAt,isEmission,clamp} from './interaction.js?v=phrase1'
+import {pilePosition,directionAt,isEmission,clamp} from './interaction.js?v=portrait1'
 import {createSeaEffects} from './effects.js?v=phrase1'
 const params=new URLSearchParams(location.search)
 const display=params.get('display')==='1'
@@ -94,15 +94,28 @@ if(display) {
   }
   function layout() {
     const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return
-    canvas.style.setProperty('--sentence-size',`${clamp(rect.width/40,19,28)}px`)
+    const portrait=rect.height>rect.width
+    const fontSize=portrait?clamp(rect.width/31,19,27):clamp(rect.width/40,19,28)
+    canvas.style.setProperty('--sentence-size',`${fontSize}px`)
     for(const [id,el] of nodes){
-      const state=states.get(id),pile=pilePosition(state.index)
+      const state=states.get(id),pile=pilePosition(state.index,portrait)
       if(!state.placed){state.x=pile.x;state.y=pile.y}
       el.style.setProperty('--tilt',`${pile.angle}deg`)
       el.style.setProperty('--depth-scale',pile.scale)
       el.style.setProperty('--lean',`${(pile.depth-50)*.35}deg`)
       el.style.setProperty('--depth-opacity',.62+pile.depth*.0038)
       el.style.zIndex=String(pile.depth)
+      // Fit the complete phrase and its rotated bounds inside the sea.
+      el.style.fontSize=`${fontSize}px`
+      const textWidth=el.scrollWidth
+      if(textWidth>rect.width*.72)el.style.fontSize=`${fontSize*rect.width*.72/textWidth}px`
+      if(!state.placed){
+        const angle=Math.abs(pile.angle)*Math.PI/180
+        const halfWidth=(el.offsetWidth*Math.cos(angle)+el.offsetHeight*Math.sin(angle))*pile.scale/2
+        const halfHeight=(el.offsetWidth*Math.sin(angle)+el.offsetHeight*Math.cos(angle))*pile.scale/2
+        state.x=clamp(state.x,.07+halfWidth/rect.width,.93-halfWidth/rect.width)
+        state.y=clamp(state.y,.14+halfHeight/rect.height,.86-halfHeight/rect.height)
+      }
       updateNode(id)
     }
   }
