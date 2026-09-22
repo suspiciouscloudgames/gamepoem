@@ -96,3 +96,31 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #tablet .fragment.assembled{transform:translate(-50%,-50%);opacity:1;color:#fffde2;letter-spacing:0;white-space:nowrap;max-width:none;min-height:44px;padding:8px 4px;text-shadow:0 2px 8px #001b25}
 #tablet .fragment.assembled.dragging{transform:translate(-50%,-50%) scale(1.06)}
 @keyframes sentence-settle{from{border-color:#efffd0c9;box-shadow:0 0 28px #caffd529}to{border-color:#e2fff52b;box-shadow:none}}
+/* A poem editor and a five-way choice, with no written instructions. */
+[hidden]{display:none!important}
+#poem-composer{position:absolute;z-index:3;top:12%;left:8%;width:84%;height:25%;display:flex;gap:12px;align-items:flex-start;border-bottom:1px solid #e5f5e940;background:linear-gradient(180deg,transparent,#06263538);border-radius:12px;transition:background .25s}
+#poem-composer:not(.has-lines)::before{content:'≋';position:absolute;left:50%;top:35%;font-size:42px;line-height:1;color:#d6eee96e;transform:translateX(-50%)}
+#poem-lines{flex:1;min-width:0;height:100%;overflow-y:auto;overscroll-behavior:contain;padding:8px 4px;scrollbar-width:thin}
+.poem-line{display:flex;align-items:center;gap:14px;min-height:48px;width:100%;padding:8px;text-align:left;color:#fff9df;font-size:clamp(18px,2.6vw,25px);line-height:1.4;touch-action:none;position:relative}
+.line-grip{font-size:19px;opacity:.35}.poem-line.dragging{z-index:10;background:#153e43d9;border-radius:8px}
+#poem-finish{flex-shrink:0;width:52px;height:52px;border:1px solid #d3edc384;border-radius:50%;margin-top:10px;background:#122f365c}
+#poem-finish svg,#poem-restart svg,.choice-write svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+#poem-composer.receiving{background:#bdedb326}
+#phrase-choice{position:absolute;top:0;left:0;right:0;bottom:0;z-index:20;background:#061e2db5;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.choice-dismiss{position:absolute;top:0;left:0;width:100%;height:100%}
+.choice-wheel{position:absolute;left:50%;top:50%;width:300px;height:340px;transform:translate(-50%,-50%)}
+.choice-phrase{position:absolute;bottom:calc(100% + 20px);left:50%;width:85vw;max-width:650px;transform:translateX(-50%);text-align:center;font-size:clamp(23px,3.6vw,32px);color:#fffbe6;line-height:1.5;text-shadow:0 2px 10px #001923}
+.choice-wheel button{position:absolute;width:64px;height:64px;border-radius:50%;border:1px solid #daf1e56e;background:#11344085;font-size:30px;display:flex;align-items:center;justify-content:center}
+.choice-wheel button:active{background:#adcdb359;transform:scale(.95)}
+.choice-wheel [data-send=up]{left:118px;top:0}.choice-wheel [data-send=down]{left:118px;bottom:0}.choice-wheel [data-send=left]{left:0;top:138px}.choice-wheel [data-send=right]{right:0;top:138px}.choice-wheel .choice-write{left:110px;top:130px;width:80px;height:80px;background:#d7e7c729;border-color:#e7f4d3c9;color:#fff7d8}
+#tablet .fragment.picked{opacity:0}
+#poem-ending{position:absolute;top:0;left:0;right:0;bottom:0;z-index:30;background:#071e2bea;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8% 10%;animation:poem-arrive 1.2s ease-out}
+#finished-poem{width:100%;max-height:76%;overflow:auto;text-align:center;font-size:clamp(21px,3vw,32px);line-height:1.7;color:#f6f1da;scrollbar-width:thin}
+#finished-poem p{margin:.4em 0}
+#poem-restart{width:52px;height:52px;margin-top:32px;border:1px solid #e9efdc55;border-radius:50%;color:#e9efdc}
+.ending-progress{position:absolute;bottom:7%;left:35%;width:30%;height:1px;background:#e5eedc70;transform-origin:left;animation:poem-time 12s linear forwards}
+#tablet:not(.running) #poem-composer{visibility:hidden}
+@keyframes poem-arrive{from{opacity:0}to{opacity:1}}@keyframes poem-time{to{transform:scaleX(0)}}
+@media(orientation:landscape){.choice-wheel{width:270px;height:240px}.choice-wheel [data-send=up]{left:103px}.choice-wheel [data-send=down]{left:103px}.choice-wheel [data-send=left],.choice-wheel [data-send=right]{top:88px}.choice-wheel .choice-write{left:95px;top:80px}.choice-phrase{bottom:calc(100% + 12px)}#poem-composer{top:10%;height:26%}}
+
+#tablet.ending #canvas,#tablet.ending #poem-composer,#tablet.ending header{visibility:hidden}
