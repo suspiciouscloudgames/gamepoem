@@ -84,3 +84,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   #tablet{padding:max(20px,env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom))}
   #tablet .wordmark{font-size:12px;letter-spacing:.1em}
 }
+
+/* A quiet writing place; its empty strokes invite phrases without instructions. */
+#sentence{position:absolute;left:5%;right:5%;top:3%;height:28%;min-height:100px;border:1px solid #e2fff52b;border-radius:18px;background:linear-gradient(155deg,#e3fff50d,#092d3826);display:flex;align-items:center;justify-content:center;gap:14px;pointer-events:none;transition:background .25s,border-color .25s,box-shadow .25s}
+.sentence-blank{width:21%;height:38px;border-bottom:1px solid #d4f2e671;transform:rotate(-2deg)}
+.sentence-blank:nth-child(2){width:29%;transform:rotate(1deg)}
+.sentence-dot{color:#e7f9ec99;font-size:28px;align-self:center}
+#sentence.filled .sentence-blank,#sentence.filled .sentence-dot{opacity:0}
+#sentence.receiving{border-color:#d8ffddaa;background:#b7eac525;box-shadow:0 0 36px #caffd51a}
+#sentence.settled{animation:sentence-settle .7s ease-out}
+#tablet .fragment.assembled{transform:translate(-50%,-50%);opacity:1;color:#fffde2;letter-spacing:0;white-space:nowrap;max-width:none;min-height:44px;padding:8px 4px;text-shadow:0 2px 8px #001b25}
+#tablet .fragment.assembled.dragging{transform:translate(-50%,-50%) scale(1.06)}
+@keyframes sentence-settle{from{border-color:#efffd0c9;box-shadow:0 0 28px #caffd529}to{border-color:#e2fff52b;box-shadow:none}}
