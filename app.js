@@ -1,6 +1,6 @@
 import {fragments,fragmentById as byId} from './content.js?v=phrase1'
 import {pilePosition,directionAt,isEmission,clamp} from './interaction.js?v=portrait1'
-import {createSeaEffects} from './effects.js?v=phrase1'
+import {createSeaEffects} from './effects.js?v=pulmo1'
 const params=new URLSearchParams(location.search)
 const display=params.get('display')==='1'
 const room=/^[a-zA-Z0-9_-]{1,40}$/.test(params.get('room')||'')?params.get('room'):'sinopale'
