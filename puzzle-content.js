@@ -13,11 +13,12 @@ export const fragments = [
       "answer-21",
       "answer-13",
       "answer-28"
-    ]
+    ],
+    "particle": "에"
   },
   {
     "id": "answer-14",
-    "text": "그 나무 아래에",
+    "text": "그 나무 아래",
     "kind": "answer",
     "mate": "sentence-14",
     "group": "place"
@@ -36,11 +37,12 @@ export const fragments = [
       "answer-21",
       "answer-13",
       "answer-28"
-    ]
+    ],
+    "particle": "에"
   },
   {
     "id": "answer-21",
-    "text": "같은 자리에",
+    "text": "같은 자리",
     "kind": "answer",
     "mate": "sentence-21",
     "group": "place"
@@ -59,11 +61,12 @@ export const fragments = [
       "answer-21",
       "answer-13",
       "answer-28"
-    ]
+    ],
+    "particle": "에만"
   },
   {
     "id": "answer-13",
-    "text": "개가 있던 자리에만",
+    "text": "개가 있던 자리",
     "kind": "answer",
     "mate": "sentence-13",
     "group": "place"
@@ -82,11 +85,12 @@ export const fragments = [
       "answer-21",
       "answer-13",
       "answer-28"
-    ]
+    ],
+    "particle": "에"
   },
   {
     "id": "answer-28",
-    "text": "나무 아래에",
+    "text": "나무 아래",
     "kind": "answer",
     "mate": "sentence-28",
     "group": "place"
@@ -103,11 +107,12 @@ export const fragments = [
     "accepts": [
       "answer-17",
       "answer-26"
-    ]
+    ],
+    "particle": "을/를"
   },
   {
     "id": "answer-17",
-    "text": "평온한 마음을",
+    "text": "평온한 마음",
     "kind": "answer",
     "mate": "sentence-17",
     "group": "feeling"
@@ -125,11 +130,12 @@ export const fragments = [
       "answer-17",
       "answer-25",
       "answer-26"
-    ]
+    ],
+    "particle": "을/를"
   },
   {
     "id": "answer-25",
-    "text": "많은 위로를",
+    "text": "많은 위로",
     "kind": "answer",
     "mate": "sentence-25",
     "group": "feeling"
@@ -146,11 +152,12 @@ export const fragments = [
     "accepts": [
       "answer-17",
       "answer-26"
-    ]
+    ],
+    "particle": "을/를"
   },
   {
     "id": "answer-26",
-    "text": "평온하고 다정한 마음을",
+    "text": "평온하고 다정한 마음",
     "kind": "answer",
     "mate": "sentence-26",
     "group": "feeling"
@@ -169,11 +176,12 @@ export const fragments = [
       "answer-25",
       "answer-26",
       "answer-18"
-    ]
+    ],
+    "particle": "을/를"
   },
   {
     "id": "answer-18",
-    "text": "그 감정을",
+    "text": "그 감정",
     "kind": "answer",
     "mate": "sentence-18",
     "group": "feeling"
@@ -190,11 +198,12 @@ export const fragments = [
     "accepts": [
       "answer-10",
       "answer-22"
-    ]
+    ],
+    "particle": "이/가"
   },
   {
     "id": "answer-10",
-    "text": "감응장이",
+    "text": "감응장",
     "kind": "answer",
     "mate": "sentence-10",
     "group": "presence"
@@ -213,11 +222,12 @@ export const fragments = [
       "answer-16",
       "answer-22",
       "answer-29"
-    ]
+    ],
+    "particle": "이/가"
   },
   {
     "id": "answer-16",
-    "text": "그 반려체가",
+    "text": "그 반려체",
     "kind": "answer",
     "mate": "sentence-16",
     "group": "presence"
@@ -236,11 +246,12 @@ export const fragments = [
       "answer-16",
       "answer-22",
       "answer-29"
-    ]
+    ],
+    "particle": "이/가"
   },
   {
     "id": "answer-22",
-    "text": "무언가가",
+    "text": "무언가",
     "kind": "answer",
     "mate": "sentence-22",
     "group": "presence"
@@ -259,11 +270,12 @@ export const fragments = [
       "answer-16",
       "answer-22",
       "answer-29"
-    ]
+    ],
+    "particle": "이/가"
   },
   {
     "id": "answer-29",
-    "text": "그 반려체가",
+    "text": "그 반려체",
     "kind": "answer",
     "mate": "sentence-29",
     "group": "presence"

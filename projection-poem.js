@@ -1,3 +1,4 @@
+import {composeSentence} from './korean-particles.js?v=particles1'
 // The film owns the ending timing; the tablet supplies ordered phrase IDs.
 export function connectPoemEnding({byId,complete,progress}){
   let latest=null,showing=false
@@ -31,7 +32,7 @@ export function connectPoemEnding({byId,complete,progress}){
     for(const fill of Array.isArray(p.fills)?p.fills.slice(0,132):[]){
       if(!fill)continue
       const sentence=byId.get(fill.sentenceId),answer=byId.get(fill.answerId)
-      if(sentence?.kind==='sentence'&&answer?.kind==='answer'&&(!sentence.accepts||sentence.accepts.includes(answer.id)))texts[fill.sentenceId]=sentence.before+answer.text+sentence.after
+      if(sentence?.kind==='sentence'&&answer?.kind==='answer'&&(!sentence.accepts||sentence.accepts.includes(answer.id)))texts[fill.sentenceId]=composeSentence(sentence,answer)
     }
     latest={token:p.token,lines:p.lines.filter(id=>byId.has(id)).slice(0,132),texts}
   }}

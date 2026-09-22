@@ -1,3 +1,4 @@
+import {composeSentence} from './korean-particles.js?v=particles1'
 import {pilePosition,clamp} from './interaction.js?v=portrait1'
 export function setupPoem({fragments,canvas,startConnection,send,room}){
   const tablet=document.querySelector('#tablet'),nodes=new Map(),states=new Map(),order=[]
@@ -24,7 +25,7 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
   function collected(id){return staged.has(id)||order.includes(id)||Array.from(completedAnswers.values()).includes(id)}
   function sentenceText(id){
     const state=states.get(id),answer=states.get(completedAnswers.get(id))
-    return state.kind==='sentence'&&answer?state.before+answer.text+state.after:state.text
+    return state.kind==='sentence'&&answer?composeSentence(state,answer):state.text
   }
   function paint(el,state,complete=false){
     el.textContent=''
