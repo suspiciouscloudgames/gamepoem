@@ -1,4 +1,4 @@
-import {setupPoem} from './poem.js?v=poem1'
+import {setupPoem} from './poem.js?v=release2'
 import {fragments,fragmentById as byId} from './content.js?v=phrase1'
 import {pilePosition,directionAt,isEmission,clamp} from './interaction.js?v=portrait1'
 import {createSeaEffects} from './effects.js?v=pulmo1'
@@ -56,24 +56,12 @@ if(display) {
   setInterval(refreshLayerText,250)
   startConnection({display:true,room,onState:renderLayers})
 } else {
-  // Load the sea only on the tablet, never in the transparent projection iframe.
-  const ocean=document.querySelector('#ocean')
-  ocean.muted=true
-  ocean.poster=new URL('./assets/ocean-aerial-poster.jpg',import.meta.url).href
-  ocean.src=new URL('./assets/ocean-aerial-loop.mp4',import.meta.url).href
-  let started=false
-  const playOcean=()=>{if(started&&ocean.paused&&!document.hidden)ocean.play().catch(()=>{})}
-  // iPad power-saving policies can defer autoplay until the first touch.
-  document.addEventListener('pointerdown',playOcean,{passive:true})
-  document.addEventListener('visibilitychange',()=>document.hidden?ocean.pause():playOcean())
+  // The artist's photograph is used only on the tablet.
   document.querySelector('#begin').addEventListener('click',()=>{
     const root=document.documentElement
-    // iPad Safari before 16.4 uses the prefixed document fullscreen API.
     const fullscreen=root.requestFullscreen||root.webkitRequestFullscreen||root.webkitRequestFullScreen
     if(fullscreen&&!navigator.standalone){try{const result=fullscreen.call(root);result?.catch(()=>{})}catch{}}
-    started=true;ocean.loop=true;ocean.muted=true
     document.querySelector('#tablet').classList.add('running')
-    ocean.play().catch(()=>{started=false;document.querySelector('#tablet').classList.remove('running')})
   })
   setupPoem({fragments,room,canvas:document.querySelector('#canvas'),startConnection,
     send(items){if(network)network.publish(items);else pendingState=items}})

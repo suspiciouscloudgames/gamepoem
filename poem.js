@@ -30,11 +30,12 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
   }
   function add(id){if(!order.includes(id))order.push(id);Object.assign(states.get(id),{active:false,removed:false,direction:null,sentAt:0});clearChoice();renderPoem();layout();publish()}
   function renderPoem(){
-    lines.textContent='';composer.classList.toggle('has-lines',order.length>0);finish.hidden=order.length<2
+    lines.textContent='';composer.classList.toggle('has-lines',order.length>0);finish.hidden=order.length<1
     order.forEach((id,i)=>{
       const el=document.createElement('button');el.className='poem-line';el.dataset.id=id;el.setAttribute('aria-label',states.get(id).text)
       el.innerHTML='<span class="line-grip" aria-hidden="true">⠿</span><span></span>';el.lastChild.textContent=states.get(id).text
-      el.addEventListener('pointerdown',event=>begin(event,id,true));el.addEventListener('pointermove',move);el.addEventListener('pointerup',release);el.addEventListener('pointercancel',cancel)
+      el.addEventListener('click',event=>{if(!event.target.closest('.line-grip'))choose(id)})
+      el.addEventListener('pointerdown',event=>{if(event.target.closest('.line-grip'))begin(event,id,true)});el.addEventListener('pointermove',move);el.addEventListener('pointerup',release);el.addEventListener('pointercancel',cancel)
       el.addEventListener('keydown',event=>{
         if(event.key==='Enter'||event.key===' '){event.preventDefault();choose(id)}
         if(event.key==='ArrowUp'||event.key==='ArrowDown'){event.preventDefault();const target=clamp(i+(event.key==='ArrowUp'?-1:1),0,order.length-1);order.splice(i,1);order.splice(target,0,id);renderPoem();lastAction=Date.now()}
@@ -89,11 +90,15 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
   }
   function reset(){clearTimeout(endingTimer);clearChoice();cancel();ending=false;end.hidden=true;tablet.classList.remove('ending');order.length=0;states.forEach(s=>Object.assign(s,{active:false,removed:false,direction:null,sentAt:0}));renderPoem();layout();publish()}
   finish.addEventListener('click',()=>{
-    if(order.length<2)return
+    if(order.length<1)return
     clearChoice();ending=true;tablet.classList.add('ending');const poem=end.querySelector('#finished-poem');poem.textContent=''
     order.forEach(id=>{const line=document.createElement('p');line.textContent=states.get(id).text;poem.append(line)})
-    end.hidden=false;endingTimer=setTimeout(reset,12000)
+    const characters=order.reduce((count,id)=>count+states.get(id).text.length,0)
+    const duration=Math.max(12000,characters*160+order.length*1200)
+    end.style.setProperty('--ending-duration',`${duration/1000}s`)
+    end.hidden=false;poem.scrollTop=0;endingTimer=setTimeout(reset,duration)
   })
+  lines.addEventListener('scroll',()=>{lastAction=Date.now()},{passive:true})
   end.querySelector('#poem-restart').addEventListener('click',reset)
   chooser.querySelector('.choice-dismiss').addEventListener('click',clearChoice)
   chooser.querySelector('.choice-write').addEventListener('click',()=>{if(selected)add(selected)})
