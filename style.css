@@ -250,3 +250,34 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .ocean-shade{background:linear-gradient(180deg,rgba(158,177,191,.17) 0%,rgba(125,150,167,.23) 42%,rgba(45,75,93,.2) 63%,rgba(12,39,56,.23) 100%)}
 .ocean-backdrop::after{background:radial-gradient(ellipse at 50% 40%,rgba(50,73,90,.08),rgba(25,47,64,.12) 100%)}
 #tablet #poem-lines .poem-line{background-image:linear-gradient(180deg,#fffdf2 0%,#fff9e9 45%,#d4e9ed 100%);background-size:100% 100%;filter:drop-shadow(0 1px 2px #102736) drop-shadow(0 0 5px #10273680)}
+
+/* Rescue drifting words from deep water into a diffuse sun. */
+.ocean-shade{background:linear-gradient(180deg,#24384c18 0%,#172e4118 40%,#03132180 60%,#010c1bea 82%,#000711fa 100%)}
+#tablet #poem-composer{left:10%;width:80%;padding:0 3%;align-items:center}
+#tablet #poem-composer .poem-sun{position:absolute;z-index:-1;left:50%;top:50%;width:110%;height:140%;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;background:radial-gradient(ellipse,#ffefaa9c 0%,#f5d46473 24%,#e8b44235 48%,#e8b44200 72%);filter:blur(15px);transition:filter .5s,opacity .5s;opacity:.86}
+#tablet #poem-composer.receiving{background:none}
+#tablet #poem-composer.receiving .poem-sun{opacity:1;filter:blur(10px)}
+#tablet #poem-lines{position:relative;z-index:1}
+#tablet #poem-lines .poem-line{background-image:linear-gradient(180deg,#fffdf0,#ffe8a0);filter:drop-shadow(0 1px 2px #342c20) drop-shadow(0 0 4px #342c2070)}
+#tablet .floating-phrase{background-image:linear-gradient(180deg,#fff5b8 0%,#ffe195 25%,#cfe5de 52%,#78a7c1 78%,#5b839f 100%)}
+#tablet .fragment{color:#b5c9d5;text-shadow:0 2px 5px #000b17;}
+#tablet .fragment.drifting{z-index:200!important;color:#dce7e7;opacity:1;animation:none!important;cursor:grab}
+#tablet #poem-lines{align-content:center}
+
+/* A circular sun keeps its shape as the poem area grows. */
+#tablet #poem-composer .poem-sun{width:min(58vw,34vh);height:min(58vw,34vh);border-radius:50%;background:radial-gradient(circle,#ffefaaad 0%,#f5d46480 30%,#e8b4423d 53%,#e8b44200 73%);filter:blur(12px)}
+#tablet #poem-composer.receiving .poem-sun{filter:blur(8px)}
+
+/* Redacted sentences and their missing phrases share the sea floor. */
+#tablet .fragment.sentence{width:clamp(180px,42vw,380px);max-width:74%;white-space:normal;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere;letter-spacing:0;padding:8px}
+.redacted{display:inline-block;height:.95em;vertical-align:-.05em;margin:0 .13em;background:#020304!important;background-clip:border-box!important;-webkit-background-clip:border-box!important;box-shadow:0 0 0 1px #020304;color:transparent!important;-webkit-text-fill-color:transparent!important;border-radius:0}
+.floating-phrase.sentence{white-space:normal;width:clamp(180px,42vw,380px);max-width:74vw;line-height:1.65}
+#poem-assembly{position:absolute;left:8%;top:47%;width:84%;height:23%;z-index:4;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:8px 14px;overflow:hidden;touch-action:none}
+.assembly-piece{font-family:'Nanum Myeongjo',serif;font-size:var(--assembly-size,15px);line-height:1.65;padding:4px 6px;max-width:100%;color:#f2edcf;text-align:center;touch-action:none;text-shadow:0 1px 4px #091929;overflow-wrap:anywhere}
+.assembly-piece.sentence{flex:1 1 65%}.assembly-piece.answer{color:#ffe2a1}
+.assembly-piece.held{opacity:0}
+#tablet.at-ending #poem-assembly{pointer-events:none}
+#tablet #poem-lines .poem-line{animation:sentence-resolved 1s ease-out}
+@keyframes sentence-resolved{from{opacity:.3;transform:translateY(12px);filter:blur(2px)}to{opacity:1;transform:translateY(0)}}
+#poem-assembly{display:grid;align-items:center;grid-auto-rows:min-content}
+.assembly-piece{width:100%;min-width:0}
