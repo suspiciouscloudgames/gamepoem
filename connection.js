@@ -1,5 +1,5 @@
 // Only real gestures publish state. Idle tabs must never erase another tablet.
-export function connectScreen({display,room,onState,onStatus,getState}) {
+export function connectScreen({display,room,onState,onStatus,getState,onControl,onProgress}) {
   const hostId=`gamepoem-v2-screen-${room}`
   const sender=typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function'?crypto.randomUUID():`tablet-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`
   const role=display?'display':'tablet'
@@ -8,9 +8,11 @@ export function connectScreen({display,room,onState,onStatus,getState}) {
   let peer=null,upstream=null,retry=null,closed=false,generation=0,isHost=false,follower=false
   let lastAck=0,lastUpstreamAck=0,openedAt=0,lastAttempt=0,revision=0,latest=null,localState=null
   const clients=new Set()
+  let latestProgress=null,progressRevision=0
   const packet=(type,extra={})=>({app:'gamepoem-v2',type,sender,role,...extra})
   const send=(conn,data)=>{try{if(conn?.open)conn.send(data)}catch{}}
-  const fresh=data=>data&&Date.now()-data.changedAt<95000
+  const fresh=data=>data&&Date.now()-data.changedAt<(data.items?.some(item=>item.kind==='poem')?1800000:95000)
+  const seenControls=new Set()
   function status(message) {
     const connected=display?(isHost||Date.now()-lastAck<7000):Date.now()-lastAck<7000
     document.documentElement.dataset.screenConnection=connected?'connected':'waiting'
@@ -20,9 +22,29 @@ export function connectScreen({display,room,onState,onStatus,getState}) {
   function sync(conn) {
     const data=display?latest:localState
     if(fresh(data))send(conn,data)
+    if(latestProgress&&Date.now()-latestProgress.sentAt<6000)send(conn,latestProgress)
   }
   function receive(data,conn) {
     if(!data||data.app!=='gamepoem-v2'||data.sender===sender)return
+    if(data.type==='progress'&&data.role==='display'){
+      if(!Number.isFinite(data.progress)||data.progress<0||data.progress>1||!Number.isFinite(data.sentAt)||Date.now()-data.sentAt>6000||!['playing','paused','ending'].includes(data.phase)||typeof data.eventId!=='string')return
+      if(seenControls.has(data.eventId)||latestProgress&&data.sentAt<latestProgress.sentAt)return
+      seenControls.add(data.eventId);if(seenControls.size>100)seenControls.delete(seenControls.values().next().value)
+      latestProgress=data;onProgress?.(data)
+      channel?.postMessage(data)
+      if(isHost)clients.forEach(client=>{if(client!==conn)send(client,data)})
+      else if(conn!==upstream)send(upstream,data)
+      return
+    }
+    if(data.type==='cycle'&&data.role==='display'&&typeof data.token==='string'&&typeof data.eventId==='string'){
+      if(seenControls.has(data.eventId))return
+      seenControls.add(data.eventId);if(seenControls.size>100)seenControls.delete(seenControls.values().next().value)
+      onControl?.(data)
+      channel?.postMessage(data)
+      if(isHost)clients.forEach(client=>{if(client!==conn)send(client,data)})
+      else if(conn!==upstream)send(upstream,data)
+      return
+    }
     if(data.type==='ack') {
       lastAck=Date.now();if(conn===upstream)lastUpstreamAck=lastAck
       status('자동 연결됨')
@@ -119,5 +141,10 @@ export function connectScreen({display,room,onState,onStatus,getState}) {
   const visible=()=>{if(!document.hidden)resume()}
   document.addEventListener('visibilitychange',visible)
   boot()
-  return {publish,close(){closed=true;++generation;clearInterval(heartbeat);clearTimeout(retry);channel?.close();peer?.destroy();window.removeEventListener('online',resume);document.removeEventListener('visibilitychange',visible)}}
+  return {publish,reportProgress(progress,phase,currentTime,cycle){
+    if(!display||closed||!Number.isFinite(progress))return
+    const data=packet('progress',{progress:Math.max(0,Math.min(1,progress)),phase,...(Number.isFinite(currentTime)&&currentTime>=0&&typeof cycle==='string'?{currentTime,cycle}:{}),sentAt:Date.now(),eventId:sender+'-progress-'+(++progressRevision)})
+    latestProgress=data;seenControls.add(data.eventId);if(seenControls.size>100)seenControls.delete(seenControls.values().next().value)
+    channel?.postMessage(data);clients.forEach(client=>send(client,data));send(upstream,data)
+  },completePoem(token){if(!display||closed)return;const data=packet('cycle',{token,eventId:sender+'-'+Date.now()});seenControls.add(data.eventId);channel?.postMessage(data);clients.forEach(client=>send(client,data));send(upstream,data)},close(){closed=true;++generation;clearInterval(heartbeat);clearTimeout(retry);channel?.close();peer?.destroy();window.removeEventListener('online',resume);document.removeEventListener('visibilitychange',visible)}}
 }

@@ -7,3 +7,9 @@ License: Mixkit Stock Video Free License, identified on the source page on 2026-
 https://mixkit.co/license/#videoFree
 
 Used within the Game Poem interactive website. The opening 12 seconds were slowed to two-thirds speed, trimmed to sea-only imagery, crossfaded into a 16-second loop and encoded as muted H.264 video. The JPEG is a fallback frame from the same clip. This asset's license is separate from the site's code and authored text.
+
+# Nanum Myeongjo
+
+Nanum Myeongjo Regular, NAVER Corporation; font design by FONTRIX.
+Source: https://github.com/google/fonts/tree/main/ofl/nanummyeongjo
+Bundled unmodified with its SIL Open Font License in `fonts/NanumMyeongjo-OFL.txt`.

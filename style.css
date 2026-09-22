@@ -140,3 +140,54 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #poem-composer{background:#061c325e;border-bottom-color:#e5f2e059}
 #poem-composer.receiving{background:#133c43a3}
 .ending-progress{animation-duration:var(--ending-duration,12s)}
+#poem-composer{border:1px solid #e1edcf80;border-radius:14px;background:#061c326b;box-shadow:inset 0 0 30px #112e3229}
+#poem-finish.sealed{background:#d1e2b859;box-shadow:0 0 18px #e8ffbc30}
+#drag-shores{position:absolute;top:0;left:0;right:0;bottom:0;z-index:8;pointer-events:none;opacity:0;transition:opacity .2s}
+.holding #drag-shores{opacity:1}
+#drag-shores span{position:absolute;display:flex;align-items:center;justify-content:center;width:60px;height:60px;border:1px solid #e2f4df75;border-radius:50%;color:#f4ffe5;background:#0c303aca;font-size:32px;transition:background .2s,transform .2s}
+[data-shore=up]{top:1%;left:calc(50% - 30px)}[data-shore=down]{bottom:1%;left:calc(50% - 30px)}[data-shore=left]{left:1%;top:calc(50% - 30px)}[data-shore=right]{right:1%;top:calc(50% - 30px)}
+[data-drag-direction=up] [data-shore=up],[data-drag-direction=down] [data-shore=down],[data-drag-direction=left] [data-shore=left],[data-drag-direction=right] [data-shore=right]{background:#8da99ed9;transform:scale(1.12)}
+#projection-poem{position:fixed;top:0;left:0;width:100%;height:100%;z-index:50;display:flex;align-items:center;justify-content:center;background:#061722ed;color:#f7f3e2;padding:6% 12%;animation:poem-arrive 1.5s ease-out}
+#projection-poem>div{max-height:100%;width:100%;overflow:hidden;text-align:center;font-size:clamp(22px,3vw,48px);line-height:1.6;scrollbar-width:none}
+#projection-poem p{margin:.4em 0}
+/* A tide inside the poem box follows the projection's real playback position. */
+#poem-composer{--water-level:0;isolation:isolate;overflow:hidden}
+.poem-water{position:absolute;bottom:0;left:0;width:100%;height:calc(var(--water-level)*100%);z-index:-1;pointer-events:none;background:linear-gradient(0deg,#7eb7b16b,#b5d7b54d);border-top:1px solid #e8f4c994;transition:height 1s linear,filter 2s,opacity 2s;box-shadow:0 -5px 22px #d7f1c712}
+.water-surface{position:absolute;top:-4px;left:-50%;width:200%;height:9px;border-radius:50%;background:#d5e6b92b;animation:tide-breathe 6s ease-in-out infinite alternate}
+#poem-composer.nearly-full{border-color:#f0f3c2ba;box-shadow:0 0 24px #e5efb423}
+#poem-composer.nearly-full .poem-water{background:linear-gradient(0deg,#88c0b36b,#d2dfa960);border-top-color:#fcffd8}
+#poem-composer.at-ending .poem-water{filter:brightness(1.2)}
+#poem-composer.tide-stale .poem-water{opacity:.55}
+#poem-composer.tide-stale .water-surface{animation-play-state:paused}
+#poem-lines,#poem-finish{position:relative;z-index:1}.poem-line{text-shadow:0 2px 5px #042029}
+@keyframes tide-breathe{from{transform:translateX(-3%) scaleY(.7)}to{transform:translateX(3%) scaleY(1.3)}}
+#tablet .fragment.arriving{animation:phrase-arrives 1.6s ease-out both}
+#tablet .fragment.arriving.dragging{animation:none}
+@keyframes phrase-arrives{from{opacity:0;filter:blur(5px)}to{opacity:var(--depth-opacity,1);filter:blur(0)}}
+#tablet .fragment.arriving.removed,#tablet .fragment.arriving.picked{animation:none}
+@font-face{font-family:'Nanum Myeongjo';src:url('./assets/fonts/NanumMyeongjo-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+#tablet .fragment,#tablet .choice-phrase,#tablet .poem-line,#tablet #finished-poem{font-family:'Nanum Myeongjo','AppleMyungjo',serif;font-weight:400;font-synthesis:none;letter-spacing:0}
+/* The whole tablet is a tank section: water, a stone ledge, and settling words. */
+#tablet{--water-level:0;padding-bottom:max(20px,env(safe-area-inset-bottom));background:linear-gradient(180deg,#071b2930,#03182030);box-shadow:inset 1px 0 #cde7e229,inset -1px 0 #cde7e229}
+#tablet header{opacity:.6}.wordmark{font-size:12px!important}
+#tank-water{position:absolute;bottom:0;left:0;width:100%;height:calc(var(--water-level)*100%);z-index:1;pointer-events:none;background:linear-gradient(180deg,#82b5b529,#24536969 40%,#061f3dcc);border-top:1px solid #d3e7d39e;transition:height 1s linear,opacity 2s}
+.tank-surface{position:absolute;top:-4px;left:-20%;width:140%;height:10px;border-radius:50%;background:#c7e1d324;box-shadow:0 -4px 22px #bbebe225;animation:tide-breathe 7s ease-in-out infinite alternate}
+.tank-depth{position:absolute;bottom:0;left:0;width:100%;height:75%;background:radial-gradient(ellipse at 55% 100%,#02142b80,transparent 70%)}
+#tablet #canvas{z-index:2}
+#tablet #poem-composer{top:13%;left:9%;width:82%;height:27%;padding:7% 8% 5%;border:0;border-radius:0;box-shadow:none;background:none;overflow:visible;isolation:isolate;z-index:3}
+#poem-composer::before,#poem-composer::after{display:none!important}
+.poem-rock{position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;filter:drop-shadow(0 16px 14px #00162377);transition:filter .35s}
+#poem-composer.receiving{background:none}
+#poem-composer.receiving .poem-rock{filter:brightness(1.3) drop-shadow(0 0 20px #cde8cd35)}
+#poem-lines{width:100%;padding:0 4px;scrollbar-width:none;overscroll-behavior:contain}
+#poem-lines::-webkit-scrollbar{display:none}
+.poem-line{display:block;min-height:44px;text-align:center;font-size:clamp(18px,2.4vw,25px);line-height:1.5;touch-action:none;padding:5px 0;color:#faf3db}
+#tablet .fragment.held,.poem-line.held{opacity:0!important;animation:none!important}
+.floating-phrase{position:fixed;z-index:20;pointer-events:none;transform:translate(-50%,-50%) scale(1.08);font-family:'Nanum Myeongjo',serif;color:#fff9dd;white-space:nowrap;text-shadow:0 2px 8px #061f2b,0 0 22px #c7edde55;line-height:1.5}
+#tablet[data-drag-direction=left] #tank-water{box-shadow:inset 80px 0 90px -85px #c7f1f3}
+#tablet[data-drag-direction=right] #tank-water{box-shadow:inset -80px 0 90px -85px #c7f1f3}
+#tablet.tide-stale #tank-water{opacity:.6}#tablet.tide-stale .tank-surface{animation-play-state:paused}
+#tablet.nearly-full .tank-surface{background:#e0e9c34d}
+@media(orientation:landscape){#tablet #poem-composer{left:22%;width:56%;top:10%;height:31%;padding:3% 7% 2%}}
+
+#tablet.at-ending #canvas,#tablet.at-ending #poem-composer{pointer-events:none}

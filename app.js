@@ -1,5 +1,6 @@
-import {setupPoem} from './poem.js?v=release2'
-import {fragments,fragmentById as byId} from './content.js?v=phrase1'
+import {connectPoemEnding} from './projection-poem.js?v=cycle20'
+import {setupPoem} from './poem.js?v=cycle20'
+import {fragments,fragmentById as byId} from './film-content.js?v=cycle20'
 import {pilePosition,directionAt,isEmission,clamp} from './interaction.js?v=portrait1'
 import {createSeaEffects} from './effects.js?v=pulmo1'
 const params=new URLSearchParams(location.search)
@@ -9,6 +10,8 @@ const layerRoot=document.querySelector('#layers')
 const layerNodes=new Map()
 let displayedItems=[]
 let effects=null
+let poemEnding=null
+const cameraEvents=new Set()
 function refreshLayerText() {
   const visible=new Set()
   for(const item of displayedItems) {
@@ -26,7 +29,15 @@ function refreshLayerText() {
   for(const [id,el] of layerNodes)if(!visible.has(id))el.className='layer'
 }
 function renderLayers(items) {
-  displayedItems=items.filter(item=>item&&byId.has(item.id)&&Number.isFinite(item.x)&&Number.isFinite(item.y))
+  poemEnding?.set(items)
+  for(const item of items){
+    if(!isEmission(item)||!['left','right'].includes(item.direction))continue
+    const eventId=`${item.id}:${item.sentAt}`
+    if(cameraEvents.has(eventId))continue
+    cameraEvents.add(eventId);if(cameraEvents.size>256)cameraEvents.delete(cameraEvents.values().next().value)
+    if(parent!==window&&document.referrer)parent.postMessage({type:'film-camera',direction:item.direction,eventId},new URL(document.referrer).origin)
+  }
+  displayedItems=items.filter(item=>item&&!['left','right'].includes(item.direction)&&byId.has(item.id)&&Number.isFinite(item.x)&&Number.isFinite(item.y))
   effects?.set(displayedItems.filter(item=>isEmission(item)).map(item=>({...item,text:byId.get(item.id).text})))
   refreshLayerText()
 }
@@ -35,7 +46,7 @@ async function startConnection(options) {
   // Render the artwork before loading the network library or opening a socket.
   try {
     const [transport]=await Promise.all([
-      import('./connection.js?v=phrase1'),
+      import('./connection.js?v=cycle20'),
       new Promise((resolve,reject)=>{
         if(typeof window.Peer==='function'){resolve();return}
         const script=document.createElement('script')
@@ -52,17 +63,13 @@ async function startConnection(options) {
   }
 }
 if(display) {
+  poemEnding=connectPoemEnding({byId,complete:token=>network?.completePoem(token),progress:(value,phase,time,cycle)=>network?.reportProgress(value,phase,time,cycle)})
   effects=createSeaEffects(layerRoot)
   setInterval(refreshLayerText,250)
   startConnection({display:true,room,onState:renderLayers})
 } else {
   // The artist's photograph is used only on the tablet.
-  document.querySelector('#begin').addEventListener('click',()=>{
-    const root=document.documentElement
-    const fullscreen=root.requestFullscreen||root.webkitRequestFullscreen||root.webkitRequestFullScreen
-    if(fullscreen&&!navigator.standalone){try{const result=fullscreen.call(root);result?.catch(()=>{})}catch{}}
-    document.querySelector('#tablet').classList.add('running')
-  })
+  document.querySelector('#tablet').classList.add('running')
   setupPoem({fragments,room,canvas:document.querySelector('#canvas'),startConnection,
     send(items){if(network)network.publish(items);else pendingState=items}})
 
