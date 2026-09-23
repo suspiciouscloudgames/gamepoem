@@ -1,6 +1,6 @@
-import {connectPoemEnding} from './projection-poem.js?v=particles1'
-import {setupPoem} from './poem.js?v=particles1'
-import {fragments,fragmentById as byId} from './puzzle-content.js?v=particles1'
+import {connectPoemEnding} from './projection-poem.js?v=touchfix1'
+import {setupPoem} from './poem.js?v=touchfix1'
+import {fragments,fragmentById as byId} from './puzzle-content.js?v=touchfix1'
 import {pilePosition,directionAt,isEmission,clamp} from './interaction.js?v=portrait1'
 import {createSeaEffects} from './effects.js?v=pulmo1'
 const params=new URLSearchParams(location.search)

@@ -1,3 +1,4 @@
+import {bindDragRecovery} from './drag-recovery.js?v=touchfix1'
 import {composeSentence} from './korean-particles.js?v=particles1'
 import {pilePosition,clamp} from './interaction.js?v=portrait1'
 export function setupPoem({fragments,canvas,startConnection,send,room}){
@@ -66,7 +67,7 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
     for(const id of staged){
       const state=states.get(id),el=document.createElement('button')
       el.className=`assembly-piece ${state.kind}`;el.dataset.id=id;paint(el,state)
-      el.addEventListener('pointerdown',event=>begin(event,id,'staged'));el.addEventListener('pointermove',move);el.addEventListener('pointerup',release);el.addEventListener('pointercancel',cancel)
+      el.addEventListener('pointerdown',event=>begin(event,id,'staged'));
       el.addEventListener('keydown',event=>{if(event.key==='Escape'){staged.delete(id);renderPoem();layout()}})
       assembly.append(el)
     }
@@ -91,12 +92,14 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
   }
 
   function renderPoem(){
+    // Progress/drift updates can replace the button holding pointer capture.
+    if(drag?.inPoem)cancel()
     renderAssembly()
     lines.textContent='';composer.classList.toggle('has-lines',order.length>0)
     order.forEach((id,i)=>{
       const el=document.createElement('button');el.className='poem-line';el.dataset.id=id;el.setAttribute('aria-label',sentenceText(id))
       el.textContent=sentenceText(id)
-      el.addEventListener('pointerdown',event=>begin(event,id,true));el.addEventListener('pointermove',move);el.addEventListener('pointerup',release);el.addEventListener('pointercancel',cancel)
+      el.addEventListener('pointerdown',event=>begin(event,id,true));
       el.addEventListener('keydown',event=>{
         if(event.key==='Escape'){event.preventDefault();removeFromPoem(id);staged.add(id);renderPoem();layout();publish()}
         if(event.key==='ArrowUp'||event.key==='ArrowDown'){event.preventDefault();const target=clamp(i+(event.key==='ArrowUp'?-1:1),0,order.length-1);order.splice(i,1);order.splice(target,0,id);poemChanged();renderPoem();publish()}
@@ -162,8 +165,11 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
     if(!event.target.closest('button')&&!drag)selectPiece(null)
   })
   function begin(event,id,inPoem=false){
+    if(drag&&event.isPrimary&&event.pointerId!==drag.pointer)cancel()
     if(drag||tablet.classList.contains('at-ending')||!available.has(id)||event.button!==0)return
-    event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId)
+    event.preventDefault()
+    // Global handlers remain available if Safari cannot retain capture.
+    try{event.currentTarget.setPointerCapture(event.pointerId)}catch{}
     const r=event.currentTarget.getBoundingClientRect(),ghost=document.createElement('div')
     stopDrift(id)
     ghost.className='floating-phrase';paint(ghost,states.get(id),inPoem===true);ghost.classList.toggle('sentence',states.get(id).kind==='sentence');ghost.style.fontSize=getComputedStyle(event.currentTarget).fontSize
@@ -211,6 +217,7 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
     const cleanup=()=>{g.remove();el.classList.remove('held')};anim.onfinish=cleanup;setTimeout(cleanup,1600)
   }
   function cancel(){const d=finishDrag();if(d){d.ghost.remove();layout()}}
+  bindDragRecovery(window,document,()=>drag,{move,release,cancel})
   function dropTarget(event,id){
     const kind=states.get(id).kind
     const candidates=[...assembly.querySelectorAll('.assembly-piece'),...(kind==='answer'?lines.querySelectorAll('.poem-line'):[])]
@@ -251,7 +258,7 @@ export function setupPoem({fragments,canvas,startConnection,send,room}){
     states.set(p.id,{...p,index,x:.5,y:.5,active:false,removed:false,direction:null,sentAt:0,energy:.5})
     available.add(p.id)
     const el=document.createElement('button');el.hidden=false;el.className=`fragment ${p.kind}`;paint(el,p);el.dataset.id=p.id
-    el.addEventListener('pointerdown',event=>begin(event,p.id));el.addEventListener('pointermove',move);el.addEventListener('pointerup',release);el.addEventListener('pointercancel',cancel)
+    el.addEventListener('pointerdown',event=>begin(event,p.id));
     el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();if(available.has(p.id))add(p.id)}
 })
     canvas.append(el);nodes.set(p.id,el)
