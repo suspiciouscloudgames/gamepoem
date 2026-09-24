@@ -1,8 +1,8 @@
 import {enablePoemReorder} from './poem-reorder.js?v=touch-recovery2'
-import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=word-boundaries1'
-import {getBlackoutLocale, composeInLocale} from './blackout-locales.js?v=word-boundaries1'
+import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=two-occurrences1'
+import {getBlackoutLocale, composeInLocale} from './blackout-locales.js?v=two-occurrences1'
 import {createPoemPictures} from './poem-pictures.js?v=ipad-safari2'
-import {canFill} from './blackout-content.js?v=word-boundaries1'
+import {canFill} from './blackout-content.js?v=two-occurrences1'
 export function setupBlackout({room,startConnection,send}){
   const tablet=document.querySelector('#tablet')
   tablet.className='blackout-tablet running'

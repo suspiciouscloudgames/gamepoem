@@ -1,5 +1,5 @@
 import {acceptsPhrase,englishNoun} from './blackout-phrase-grammar.js?v=expanded1'
-import {getBlackoutLocale,turkishForm,englishPlural} from './blackout-locales.js?v=word-boundaries1'
+import {getBlackoutLocale,turkishForm,englishPlural} from './blackout-locales.js?v=two-occurrences1'
 import {promptIndices,promptTexts} from './blackout-prompt-texts.js?v=prompts38-1'
 const cache={}
 export function getPromptCatalog(language){

@@ -1,5 +1,6 @@
+import {limitRepeatedRanges} from './blackout-range-limits.js?v=two-occurrences1'
 import {extraPhrases,extraPhraseOffset,extraPhrase} from './blackout-extra-phrases.js?v=expanded1'
-import * as ko from './blackout-content.js?v=word-boundaries1'
+import * as ko from './blackout-content.js?v=two-occurrences1'
 import {translations} from './blackout-translations.js?v=revised-film1'
 const cache={ko:{...ko,answerById:new Map(ko.answers.map(a=>[a.id,a]))}}
 const number=id=>Number(id.split('-').pop())
@@ -102,7 +103,7 @@ export function getBlackoutLocale(language){
   if(plain)result.push({text:plain})
   return result
  }
- const passages=markRanges(transcript)
+ const passages=limitRepeatedRanges(markRanges(transcript))
  const result={sentences,answers,answerById,passages,transcript,fragmentById:new Map([...sentences,...answers].map(item=>[item.id,item]))}
  cache[language]=result
  return result

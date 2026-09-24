@@ -1,3 +1,4 @@
+import {limitRepeatedRanges} from './blackout-range-limits.js?v=two-occurrences1'
 import {extraPhrases} from './blackout-extra-phrases.js?v=expanded1'
 // Bars author one redaction per sentence; removing them restores the supplied captions.
 const source = `먼 곳을 바라보던 인간은 |자신에게 가장 내밀한 것|과 닮은 무언가와 마주했다.
@@ -132,11 +133,12 @@ function markRanges(part,excluded=new Set()){
  if(plain)result.push({text:plain})
  return result
 }
-export const passages=[]
+const rawPassages=[]
 for(const sentence of sentences){
- for(const part of [sentence.before,sentence.answer,sentence.originalAfter])passages.push(...markRanges(part))
- passages.push({text:' '})
+ for(const part of [sentence.before,sentence.answer,sentence.originalAfter])rawPassages.push(...markRanges(part))
+ rawPassages.push({text:' '})
 }
+export const passages=limitRepeatedRanges(rawPassages)
 export const fragments=[...sentences,...answers]
 export const fragmentById=new Map(fragments.map(item=>[item.id,item]))
 export function fillText(sentence,answer){return sentence.forms[answer.id]}
