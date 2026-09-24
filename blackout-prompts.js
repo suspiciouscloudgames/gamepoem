@@ -1,4 +1,4 @@
-import {getBlackoutLocale,turkishForm} from './blackout-locales.js?v=revised-film1'
+import {getBlackoutLocale,turkishForm} from './blackout-locales.js?v=phrase-without-demonstrative1'
 import {promptIndices,promptTexts} from './blackout-prompt-texts.js?v=prompts38-1'
 const cache={}
 export function getPromptCatalog(language){

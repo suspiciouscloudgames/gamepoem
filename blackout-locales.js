@@ -1,4 +1,4 @@
-import * as ko from './blackout-content.js?v=open-phrases1'
+import * as ko from './blackout-content.js?v=phrase-without-demonstrative1'
 import {translations} from './blackout-translations.js?v=revised-film1'
 const cache={ko:{...ko,answerById:new Map(ko.answers.map(a=>[a.id,a]))}}
 const number=id=>Number(id.split('-').pop())
