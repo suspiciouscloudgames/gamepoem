@@ -65,7 +65,7 @@
 /* The accumulated poem sits over one changing photograph. */
 .blackout-memory{position:relative;isolation:isolate;overflow:hidden}
 .blackout-memory .poem-pictures{position:absolute;top:0;right:0;bottom:0;left:0;z-index:0;display:block;min-height:0;max-height:none;padding:0;pointer-events:none}
-.blackout-memory .poem-photo-stage{position:absolute;inset:0}
+.blackout-memory .poem-photo-stage{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%}
 .blackout-memory .poem-photo-stage>img{object-fit:cover;filter:saturate(.35) sepia(.08) contrast(.96) brightness(.92)}
 .blackout-memory .poem-pictures::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(180deg,#1b1c1a66,#1b1c1a77 60%,#1b1c1a99);pointer-events:none}
 .blackout-memory .poem-pictures.empty::after{content:none}
