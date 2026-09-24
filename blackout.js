@@ -155,7 +155,7 @@ export function setupBlackout({room,startConnection,send}){
       sentence.classList.add('dissolving')
       const duration=window.matchMedia('(prefers-reduced-motion:reduce)').matches?200:1200
       completionTimer=setTimeout(()=>{if(!document.hidden)finishCompletion()},duration)
-    },3000)
+    },2000)
   }
   function finishCompletion(){
     if(!pendingCompletion)return
