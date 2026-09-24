@@ -1,7 +1,7 @@
 import {connectPoemEnding} from './projection-poem.js?v=touchfix1'
-import {setupPoem} from './poem.js?v=touchfix1'
-import {fragments,fragmentById as byId} from './puzzle-content.js?v=touchfix1'
-import {pilePosition,directionAt,isEmission,clamp} from './interaction.js?v=portrait1'
+import {setupBlackout} from './blackout.js?v=your-poem1'
+import {fragmentById as byId} from './blackout-content.js?v=no-gaps1'
+import {isEmission,clamp} from './interaction.js?v=portrait1'
 import {createSeaEffects} from './effects.js?v=pulmo1'
 const params=new URLSearchParams(location.search)
 const display=params.get('display')==='1'
@@ -68,9 +68,7 @@ if(display) {
   setInterval(refreshLayerText,250)
   startConnection({display:true,room,onState:renderLayers})
 } else {
-  // The artist's photograph is used only on the tablet.
-  document.querySelector('#tablet').classList.add('running')
-  setupPoem({fragments,room,canvas:document.querySelector('#canvas'),startConnection,
+  setupBlackout({room,startConnection,
     send(items){if(network)network.publish(items);else pendingState=items}})
 
 }

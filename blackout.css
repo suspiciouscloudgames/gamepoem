@@ -1,0 +1,98 @@
+/* Landscape iPad 8: light text and photographs held in an unbroken black field. */
+#tablet.blackout-tablet{
+ --paper:#000;--ink:#eeece5;--reading-font:'Nanum Myeongjo',serif;
+ padding:24px 32px 32px;color-scheme:dark;background:var(--paper);color:var(--ink);
+ display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);grid-template-rows:44px minmax(0,1fr);gap:20px 36px;
+ font-family:var(--reading-font);font-weight:400;user-select:none;-webkit-user-select:none;
+}
+#tablet[data-language=en],#tablet[data-language=tr]{--reading-font:Georgia,'Times New Roman',serif}
+.blackout-languages{grid-column:1;grid-row:1;display:flex;align-items:center;justify-content:flex-start;gap:4px;font-family:var(--reading-font);border:0;box-shadow:none;background:transparent}
+.blackout-languages button{min-height:44px;min-width:92px;padding:0 20px;border:0;border-radius:24px;box-shadow:none;text-decoration:none;font-size:14px;font-weight:400;letter-spacing:.015em;color:#99978f;background:transparent;white-space:nowrap;transition:background-color .2s,color .2s}
+.blackout-languages button[lang=ko]{font-family:'Nanum Myeongjo',serif}
+.blackout-languages button[lang=tr],.blackout-languages button[lang=en]{font-family:Georgia,'Times New Roman',serif}
+#tablet.blackout-tablet .blackout-languages button[aria-pressed=true]{color:#f4f1e8;background:#242423}
+.blackout-work{grid-column:1;grid-row:2;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.blackout-upper{flex:0 0 25%;min-height:156px;padding:10px 28px 16px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.blackout-sentence{position:relative;display:block;width:100%;margin:0;padding:0;text-align:left;font:inherit;font-size:20px;line-height:1.65;letter-spacing:-.015em;word-break:keep-all;overflow-wrap:anywhere;color:var(--ink);flex-shrink:0}
+.blackout-blank{width:var(--slot-width,116px);height:var(--slot-height,27px);min-width:0;max-width:100%;display:inline-block;white-space:nowrap;line-height:1.25;vertical-align:middle;overflow:hidden;background:#20201e;color:transparent;padding:2px 3px}
+.blackout-fill{color:var(--ink);padding:2px 3px}
+.blackout-field{position:relative;flex:1;min-height:0;background:#000;overflow:hidden;touch-action:none}
+.blackout-viewport{background:#fff;position:absolute;top:0;right:0;bottom:0;left:0;overflow:hidden;clip-path:inset(100%);-webkit-clip-path:inset(100%);pointer-events:none}
+.blackout-text{padding:32px 26px 96px;background:#fff;color:#181813;font-size:18px;line-height:2.1;letter-spacing:0;word-spacing:normal;text-align:left;word-break:keep-all;overflow-wrap:anywhere;will-change:transform}
+.blackout-text span{display:inline;white-space:normal;line-height:inherit}
+.blackout-text span.target{color:#000;text-decoration:none}
+.blackout-lens{position:absolute;border:0;pointer-events:none}
+.blackout-lens::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(181,139,0,.76) 0%,rgba(218,177,0,.8) 88%,rgba(255,226,38,.9) 100%);box-shadow:inset -2px 0 0 #ffe926;transform:scaleX(0);transform-origin:left center;pointer-events:none}
+.blackout-lens.settling::after{animation:blackout-dwell 1.1s linear both}
+@keyframes blackout-dwell{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.blackout-lens:focus-visible{outline:0}
+.blackout-memory{grid-column:2;grid-row:2;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--paper)}
+.blackout-poem{flex:1;min-width:0;min-height:0;padding:26px 12px 32px;overflow-y:auto;overflow-x:hidden;color:#c9c7bf;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#383836 transparent}
+.blackout-poem-lines{width:100%;margin:0;text-align:left}
+.blackout-poem p{margin:0 0 8px;padding:9px 12px;border-radius:3px;background:transparent;cursor:grab;touch-action:none;font-size:14px;line-height:1.75;letter-spacing:0;word-break:keep-all;overflow-wrap:anywhere}
+.blackout-poem p:last-child{margin-bottom:0}
+.blackout-poem p.current{color:var(--ink)}
+.blackout-poem:focus-visible{outline:0;background:#090909}
+.poem-pictures{flex:0 0 36%;min-height:185px;max-height:280px;padding:12px 12px 18px;display:flex;flex-direction:column;min-width:0}
+.poem-photo-stage{position:relative;flex:1;min-height:0;background:transparent;overflow:hidden}
+.poem-photo-stage>img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;filter:saturate(.4) sepia(.08) contrast(.94) brightness(.9)}
+.poem-photo-stage>img.arriving{animation:photo-appear 1.4s ease-in-out both}
+#tablet[data-language=en] .blackout-sentence,#tablet[data-language=tr] .blackout-sentence{font-size:19px;line-height:1.6;letter-spacing:0;word-break:normal}
+#tablet[data-language=en] .blackout-text,#tablet[data-language=tr] .blackout-text{font-size:17px;line-height:2.05;word-break:normal}
+#tablet[data-language=en] .blackout-poem p,#tablet[data-language=tr] .blackout-poem p{font-size:13px;line-height:1.75;letter-spacing:0;word-break:normal}
+@keyframes photo-appear{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.poem-photo-stage>img.arriving{animation:none}}
+@media(min-width:1200px){#tablet.blackout-tablet{padding:24px 40px 36px;column-gap:40px}.blackout-upper{padding-right:36px;padding-left:36px}}
+@media(max-height:650px) and (orientation:landscape){#tablet.blackout-tablet{padding:12px 22px 20px;row-gap:10px}.blackout-upper{min-height:140px;padding-top:8px;padding-bottom:12px}.poem-pictures{min-height:165px}.blackout-poem{padding-top:18px}}
+@media(orientation:portrait){
+ #tablet.blackout-tablet{grid-template-columns:minmax(0,1fr);grid-template-rows:44px minmax(0,2fr) minmax(0,1fr);gap:16px;padding:16px 24px 24px}
+ .blackout-memory{flex-direction:row;min-height:0}
+ .poem-pictures{flex:0 0 38%;min-height:0;max-height:none;padding:12px 20px 12px 0;border-bottom:0}
+ .blackout-poem{padding:12px 0 20px 24px}
+ .blackout-upper{min-height:150px;padding:10px 24px 16px}
+}
+
+#tablet.blackout-tablet button:focus-visible{outline:0;background-color:#1d1d1b}
+
+.blackout-poem p:focus-visible{outline:0;background:#292926}
+.blackout-poem p.poem-placeholder{color:transparent;background:#0c0c0c}
+.blackout-poem p.poem-drag-ghost{box-sizing:border-box;z-index:1000;pointer-events:none;cursor:grabbing;box-shadow:0 16px 40px #000b;background:#292926;margin:0;opacity:.97}
+
+.blackout-languages::before,.blackout-languages::after{content:none}
+@media(hover:hover){#tablet.blackout-tablet .blackout-languages button[aria-pressed=false]:hover{background:#141413;color:var(--ink)}}
+#tablet.blackout-tablet .blackout-languages button:focus-visible{box-shadow:0 0 0 3px var(--paper),0 0 0 5px #77756e}
+
+/* The accumulated poem sits over one changing photograph. */
+.blackout-memory{position:relative;isolation:isolate;overflow:hidden}
+.blackout-memory .poem-pictures{position:absolute;inset:0;z-index:0;display:block;min-height:0;max-height:none;padding:0;pointer-events:none}
+.blackout-memory .poem-photo-stage{position:absolute;inset:0}
+.blackout-memory .poem-photo-stage>img{object-fit:cover;filter:saturate(.35) sepia(.08) contrast(.92) brightness(.7)}
+.blackout-memory .poem-pictures::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0009,#000a 60%,#000c);pointer-events:none}
+.blackout-memory .poem-pictures.empty::after{content:none}
+.blackout-memory .blackout-poem{position:relative;z-index:1;flex:1;width:100%;padding:48px 30px 44px;background:transparent;color:#e8e5de}
+.blackout-memory .blackout-poem p{background:#ffffff0c;text-align:left;backdrop-filter:none;-webkit-backdrop-filter:none;text-shadow:0 1px 6px #0009}
+.blackout-memory .blackout-poem p.current{color:#fffaf0;background:#ffffff12}
+.blackout-memory .blackout-poem p:focus-visible{background:#30302bea}
+.blackout-memory .blackout-poem p.poem-placeholder{color:transparent;background:#0005}
+.blackout-memory .blackout-poem p.poem-drag-ghost{background:#292926;backdrop-filter:none;-webkit-backdrop-filter:none}
+
+.blackout-poem-lines>p{position:relative;padding-right:34px;min-height:44px}
+#tablet.blackout-tablet .poem-delete{position:absolute;top:1px;right:0;width:34px;height:44px;padding:0;border:0;border-radius:4px;background:transparent;color:#87867f;touch-action:manipulation}
+.poem-delete::before,.poem-delete::after{content:'';position:absolute;top:21px;left:11px;width:12px;height:1px;background:currentColor;transform:rotate(45deg)}
+.poem-delete::after{transform:rotate(-45deg)}
+#tablet.blackout-tablet .poem-delete:focus-visible{background:#ffffff20;color:#fff}
+@media(hover:hover){#tablet.blackout-tablet .poem-delete:hover{background:#ffffff12;color:#fff}}
+.poem-placeholder .poem-delete{visibility:hidden}
+
+.poem-title{grid-column:2;grid-row:1;align-self:center;position:relative;z-index:1;width:100%;margin:0;padding:0 16px;text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.4;font-weight:400;letter-spacing:.025em;color:#dedbd2;pointer-events:none}
+.blackout-memory .blackout-poem{padding-top:48px}
+@media(orientation:portrait){.blackout-memory{grid-column:1;grid-row:3;flex-direction:column}.poem-title{grid-column:1;grid-row:3;align-self:start;font-size:14px;padding:0}.blackout-memory{margin-top:30px}.blackout-languages button{min-width:0;padding:0 10px;font-size:12px}.blackout-languages{justify-self:start;gap:0}}
+
+#tablet.blackout-tablet .poem-finish{position:relative;z-index:1;flex:0 0 auto;align-self:center;min-height:44px;margin:12px 0 16px;padding:0 22px;border:0;border-radius:24px;background:#20221fe8;color:#e8e5de;font-family:inherit;font-size:13px}
+.poem-finish:disabled{visibility:hidden}
+.blackout-memory.reading{background:#ede9df;color:#302e28}
+.blackout-memory.reading .poem-pictures{display:none}
+.blackout-memory.reading .blackout-poem{padding:56px 34px 44px;color:#302e28}
+.blackout-memory.reading .blackout-poem p,.blackout-memory.reading .blackout-poem p.current{min-height:0;margin:0 0 14px;padding:0;background:transparent;color:#302e28;text-shadow:none;cursor:text;touch-action:pan-y}
+.blackout-memory.reading .poem-delete{display:none}
+#tablet.blackout-tablet .blackout-memory.reading .poem-finish{color:#716b60;background:transparent;margin-bottom:12px}
