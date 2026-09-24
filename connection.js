@@ -1,8 +1,12 @@
+import {SentenceEvents,validSentenceEvent} from './sentence-events.js'
 // Only real gestures publish state. Idle tabs must never erase another tablet.
-export function connectScreen({display,room,onState,onStatus,getState,onControl,onProgress}) {
+export function connectScreen({display,room,onState,onStatus,getState,onControl,onProgress,onTrigger,screenSession}) {
   const hostId=`gamepoem-v2-screen-${room}`
   const sender=typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function'?crypto.randomUUID():`tablet-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`
   const role=display?'display':'tablet'
+  const events=new SentenceEvents(sender)
+  const screenAck=()=>packet('ack',screenSession?{screenSession}:{})
+  function flushEvents(){for(const event of events.packets()){const data=packet('sentence-trigger',{event,room});channel?.postMessage(data);send(upstream,data)}}
   let channel=null
   try{if(typeof BroadcastChannel==='function')channel=new BroadcastChannel(`gamepoem-v2-${room}`)}catch{}
   let peer=null,upstream=null,retry=null,closed=false,generation=0,isHost=false,follower=false
@@ -46,13 +50,19 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
       else if(conn!==upstream)send(upstream,data)
       return
     }
+    if(data.type==='trigger-ack'&&!display&&data.room===room){events.acknowledge(data.eventId,data.sessionId);return}
+    if(data.type==='sentence-trigger'&&display&&data.room===room&&screenSession&&validSentenceEvent(data.event,screenSession)){
+      onTrigger?.(data.event,()=>{const ack=packet('trigger-ack',{room,eventId:data.event.eventId,sessionId:screenSession});conn?send(conn,ack):channel?.postMessage(ack)})
+      return
+    }
     if(data.type==='ack') {
+      if(!display&&data.screenSession){events.setSession(data.screenSession);flushEvents()}
       lastAck=Date.now();if(conn===upstream)lastUpstreamAck=lastAck
       status('자동 연결됨')
       return
     }
     if(data.type==='hello') {
-      if(display){const ack=packet('ack');conn?send(conn,ack):channel?.postMessage(ack)}
+      if(display){const ack=screenAck();conn?send(conn,ack):channel?.postMessage(ack)}
       if(conn)sync(conn)
       return
     }
@@ -63,7 +73,7 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
     channel?.postMessage(data)
     if(isHost)clients.forEach(client=>{if(client!==conn)send(client,data)})
     else if(conn!==upstream)send(upstream,data)
-    conn?send(conn,packet('ack')):channel?.postMessage(packet('ack'))
+    conn?send(conn,screenAck()):channel?.postMessage(screenAck())
   }
   if(channel)channel.onmessage=event=>receive(event.data)
   function publish(items) {
@@ -84,7 +94,7 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
     conn.on('open',()=>{
       if(current!==generation)return
       clearTimeout(timeout);lastUpstreamAck=Date.now()
-      send(conn,packet('hello'));sync(conn)
+      send(conn,packet('hello'));sync(conn);flushEvents()
     })
     conn.on('data',data=>receive(data,conn))
     const lost=()=>{clearTimeout(timeout);if(upstream===conn)upstream=null}
@@ -107,7 +117,7 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
       if(!display||current!==generation||clients.size>=16){conn.close();return}
       clients.add(conn)
       conn.on('data',data=>receive(data,conn))
-      conn.on('open',()=>{send(conn,packet('ack'));sync(conn)})
+      conn.on('open',()=>{send(conn,screenAck());sync(conn)})
       conn.on('close',()=>clients.delete(conn));conn.on('error',()=>clients.delete(conn))
     })
     peer.on('disconnected',()=>{if(current===generation)schedule()})
@@ -125,8 +135,8 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
   }
   const heartbeat=setInterval(()=>{
     if(display) {
-      channel?.postMessage(packet('ack'))
-      clients.forEach(conn=>send(conn,packet('ack')))
+      channel?.postMessage(screenAck())
+      clients.forEach(conn=>send(conn,screenAck()))
       if(latest&&!fresh(latest)){onState([]);latest=null}
     } else channel?.postMessage(packet('hello'))
     if(upstream?.open) {
@@ -135,6 +145,7 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
     }
     if(peer?.open&&!isHost&&!upstream&&Date.now()-lastAttempt>3000)dial()
     if(!peer?.open&&Date.now()-openedAt>15000)schedule()
+    if(!display){flushEvents();document.documentElement.dataset.triggerPending=String(events.pending.size)}
     if(!display)status(Date.now()-lastAck<7000?'자동 연결됨':'영상 화면을 기다리는 중')
   },2000)
   const resume=()=>{if(closed)return;if(peer?.disconnected)schedule(300);else if(!isHost)dial()}
@@ -142,7 +153,7 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
   const visible=()=>{if(!document.hidden)resume()}
   document.addEventListener('visibilitychange',visible)
   boot()
-  return {publish,reportProgress(progress,phase,currentTime,cycle){
+  return {publish,publishTrigger(phraseId){events.enqueue(phraseId);flushEvents()},reportProgress(progress,phase,currentTime,cycle){
     if(!display||closed||!Number.isFinite(progress))return
     const data=packet('progress',{progress:Math.max(0,Math.min(1,progress)),phase,...(Number.isFinite(currentTime)&&currentTime>=0&&typeof cycle==='string'?{currentTime,cycle}:{}),sentAt:Date.now(),eventId:sender+'-progress-'+(++progressRevision)})
     latestProgress=data;seenControls.add(data.eventId);if(seenControls.size>100)seenControls.delete(seenControls.values().next().value)

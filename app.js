@@ -42,6 +42,16 @@ function renderLayers(items) {
   refreshLayerText()
 }
 let network,pendingState,disposed=false
+const pendingTriggers=[],knownLines=new Set()
+function publishPoem(items){
+  if(!items.length)knownLines.clear()
+  for(const fill of items.find(item=>item.kind==='poem')?.fills||[]){
+    if(knownLines.has(fill.lineId))continue
+    knownLines.add(fill.lineId)
+    if(network)network.publishTrigger(fill.sentenceId);else pendingTriggers.push(fill.sentenceId)
+  }
+  if(network)network.publish(items);else pendingState=items
+}
 async function startConnection(options) {
   // Render the artwork before loading the network library or opening a socket.
   try {
@@ -56,6 +66,7 @@ async function startConnection(options) {
     ])
     if(disposed)return
     network=transport.connectScreen(options)
+    for(const id of pendingTriggers.splice(0))network.publishTrigger(id)
     if(pendingState){network.publish(pendingState);pendingState=null}
   } catch {
     document.documentElement.dataset.screenConnection='waiting'
@@ -66,10 +77,20 @@ if(display) {
   poemEnding=connectPoemEnding({byId,complete:token=>network?.completePoem(token),progress:(value,phase,time,cycle)=>network?.reportProgress(value,phase,time,cycle)})
   effects=createSeaEffects(layerRoot)
   setInterval(refreshLayerText,250)
-  startConnection({display:true,room,onState:renderLayers})
+  const acknowledgements=new Map(),screenSession=params.get('screenSession')
+  const parentOrigin=parent!==window&&document.referrer?new URL(document.referrer).origin:null
+  window.addEventListener('message',event=>{
+    if(event.source!==parent||event.origin!==parentOrigin||event.data?.type!=='sentence-ack'||event.data.sessionId!==screenSession)return
+    acknowledgements.get(event.data.eventId)?.();acknowledgements.delete(event.data.eventId)
+  })
+  startConnection({display:true,room,onState:renderLayers,screenSession:parentOrigin?screenSession:null,onTrigger(event,ack){
+    if(!parentOrigin)return
+    acknowledgements.set(event.eventId,ack)
+    parent.postMessage({type:'sentence-trigger',event,room},parentOrigin)
+  }})
 } else {
   setupBlackout({room,startConnection,
-    send(items){if(network)network.publish(items);else pendingState=items}})
+    send:publishPoem})
 
 }
 window.addEventListener('pagehide',()=>{disposed=true;network?.close()})
