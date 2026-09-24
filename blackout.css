@@ -16,13 +16,13 @@
 .blackout-sentence{position:relative;display:block;width:100%;margin:0;padding:0;text-align:left;font:inherit;font-size:20px;line-height:1.65;letter-spacing:-.015em;word-break:keep-all;overflow-wrap:anywhere;color:var(--ink);flex-shrink:0}
 .blackout-blank{width:auto;height:auto;min-width:0;max-width:100%;display:inline-block;white-space:nowrap;line-height:1.25;vertical-align:middle;overflow:hidden;background:#30312d;color:transparent;padding:2px 3px}
 .blackout-fill{color:var(--ink);padding:2px 3px}
-.blackout-field{position:relative;flex:1;min-height:0;background:var(--paper);overflow:hidden;touch-action:none}
-.blackout-viewport{background:var(--page);position:absolute;top:0;right:0;bottom:0;left:0;overflow:hidden;clip-path:inset(100%);-webkit-clip-path:inset(100%);pointer-events:none}
+.blackout-field{position:relative;flex:1;min-height:0;background:var(--paper);overflow:hidden;touch-action:none;isolation:isolate}
+.blackout-viewport{z-index:0;background:var(--page);position:absolute;top:0;right:0;bottom:0;left:0;overflow:hidden;clip-path:inset(100%);-webkit-clip-path:inset(100%);pointer-events:none}
 .blackout-text{padding:32px 26px 96px;background:var(--page);color:var(--page-ink);font-weight:400;font-size:18px;line-height:2.1;letter-spacing:0;word-spacing:normal;text-align:left;word-break:keep-all;overflow-wrap:anywhere;will-change:transform}
 .blackout-text span{display:inline;white-space:normal;line-height:inherit}
 .blackout-text span.target{color:var(--page-ink);text-decoration:none}
-.blackout-lens{position:absolute;border:0;pointer-events:none}
-.blackout-lens::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(91,191,216,.18) 0%,rgba(116,209,227,.28) 88%,rgba(163,231,240,.40) 100%);box-shadow:inset -1px 0 0 rgba(139,222,237,.72);transform:scaleX(0);transform-origin:left center;pointer-events:none}
+.blackout-lens{position:absolute;z-index:1;border:0;pointer-events:none}
+.blackout-lens::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(90deg,rgba(64,160,178,.32) 0%,rgba(88,182,196,.44) 88%,rgba(136,211,219,.54) 100%);box-shadow:inset -2px 0 0 rgba(58,144,161,.88);transform:scaleX(0);transform-origin:left center;pointer-events:none}
 .blackout-lens.settling::after{animation:blackout-dwell 1.1s linear both}
 @keyframes blackout-dwell{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .blackout-lens:focus-visible{outline:0}
@@ -64,10 +64,10 @@
 
 /* The accumulated poem sits over one changing photograph. */
 .blackout-memory{position:relative;isolation:isolate;overflow:hidden}
-.blackout-memory .poem-pictures{position:absolute;inset:0;z-index:0;display:block;min-height:0;max-height:none;padding:0;pointer-events:none}
+.blackout-memory .poem-pictures{position:absolute;top:0;right:0;bottom:0;left:0;z-index:0;display:block;min-height:0;max-height:none;padding:0;pointer-events:none}
 .blackout-memory .poem-photo-stage{position:absolute;inset:0}
 .blackout-memory .poem-photo-stage>img{object-fit:cover;filter:saturate(.35) sepia(.08) contrast(.96) brightness(.92)}
-.blackout-memory .poem-pictures::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#1b1c1a66,#1b1c1a77 60%,#1b1c1a99);pointer-events:none}
+.blackout-memory .poem-pictures::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(180deg,#1b1c1a66,#1b1c1a77 60%,#1b1c1a99);pointer-events:none}
 .blackout-memory .poem-pictures.empty::after{content:none}
 .blackout-memory .blackout-poem{position:relative;z-index:1;flex:1;width:100%;padding:48px 30px 44px;background:transparent;color:var(--ink)}
 .blackout-memory .blackout-poem p{background:#ffffff0c;text-align:left;backdrop-filter:none;-webkit-backdrop-filter:none;font-weight:400;text-shadow:0 1px 3px #1b1c1a66}
@@ -100,7 +100,7 @@
 .poem-book-heading{display:none}
 #tablet.blackout-tablet.reading-mode{background:var(--paper)}
 #tablet.reading-mode>.blackout-work,#tablet.reading-mode>.blackout-languages,#tablet.reading-mode>.poem-title{visibility:hidden;pointer-events:none}
-#tablet.reading-mode>.blackout-memory.reading{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;height:var(--viewport-height,100vh);margin:0;padding:28px 40px calc(48px + env(safe-area-inset-bottom,0px));isolation:isolate;background:var(--paper);color-scheme:light}
+#tablet.reading-mode>.blackout-memory.reading{position:fixed;top:0;right:0;bottom:0;left:0;z-index:100;display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;height:var(--viewport-height,100vh);margin:0;padding:28px 40px calc(48px + env(safe-area-inset-bottom,0px));isolation:isolate;background:var(--paper);color-scheme:light}
 #tablet.reading-mode .blackout-poem{flex:1;min-height:0;width:100%;max-width:880px;padding:clamp(80px,14vh,120px) 52px 64px;background:linear-gradient(90deg,#e6e1d6 0,var(--page) 2.5%,var(--page) 97%,#e8e3d9 100%);box-shadow:3px 3px 0 #c3bba9,6px 6px 0 #a39b8c,0 16px 42px #0006;scrollbar-color:#bfb6a3 transparent}
 #tablet.reading-mode .poem-book-heading{display:none}
 .poem-book-heading>span{display:block;font-family:Georgia,serif;font-size:10px;line-height:1.5;letter-spacing:.14em;color:#81796b}

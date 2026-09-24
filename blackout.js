@@ -1,7 +1,7 @@
 import {enablePoemReorder} from './poem-reorder.js?v=delete-lines1'
 import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=revised-film1'
 import {getBlackoutLocale, composeInLocale} from './blackout-locales.js?v=revised-film1'
-import {createPoemPictures} from './poem-pictures.js?v=two-projectors1'
+import {createPoemPictures} from './poem-pictures.js?v=ipad-safari2'
 import {canFill} from './blackout-content.js?v=phrase-snap1'
 export function setupBlackout({room,startConnection,send}){
   const tablet=document.querySelector('#tablet')

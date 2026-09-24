@@ -30,8 +30,8 @@ export function createPoemPictures(host){
     if(!entry.url||active===entry)return
     active=entry
     const image=document.createElement('img');image.alt=labels()[2];image.decoding='async'
-    image.onload=async()=>{
-      try{await image.decode()}catch{}
+    // onload is sufficient here; some Safari versions stall decode() on detached images.
+    image.onload=()=>{
       if(active!==entry)return
       image.alt=labels()[2]
       // Keep the fully visible previous photograph underneath until the new one is opaque.
