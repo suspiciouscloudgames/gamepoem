@@ -1,4 +1,5 @@
-import {getBlackoutLocale,turkishForm} from './blackout-locales.js?v=phrase-without-demonstrative1'
+import {acceptsPhrase,englishNoun} from './blackout-phrase-grammar.js?v=expanded1'
+import {getBlackoutLocale,turkishForm,englishPlural} from './blackout-locales.js?v=expanded-phrases1'
 import {promptIndices,promptTexts} from './blackout-prompt-texts.js?v=prompts38-1'
 const cache={}
 export function getPromptCatalog(language){
@@ -10,7 +11,7 @@ export function getPromptCatalog(language){
   const before=text.slice(0,start),originalAfter=text.slice(start+answer.length)
   const own=base.own||locale.answers.find(a=>a.text===base.answer).id
   let after=originalAfter
-  const forms={},tails={}
+  const forms={},tails={},heads={}
   if(language==='ko'&&sourceIndex!==23)after=after.slice(base.originalAfter.length-base.after.length)
   for(const {id} of locale.answers){
    const term=locale.answerById.get(id),n=Number(id.split('-').pop())
@@ -24,6 +25,19 @@ export function getPromptCatalog(language){
     else if(!base.before)form=form[0].toLocaleLowerCase(language)+form.slice(1)
    }
    forms[id]=id===own?(language==='ko'?answer+originalAfter.slice(0,originalAfter.length-after.length):answer):form
+   heads[id]=before
+   if(id!==own&&language==='en'){
+    const noun=englishNoun(term.text,id)
+    // Use complete noun phrases and agreement instead of inserting an infinitive or adverb.
+    if(n===59||n===70)forms[id]=sourceIndex===29?'no '+noun.replace(/^(?:a|the|this) /,''):sourceIndex===31?noun+' had not quite left':sourceIndex===34?'maintain '+noun:noun
+    if(sourceIndex===44)forms[id]='through '+noun
+    if(sourceIndex===19&&englishPlural(id))heads[id]=before.replace(/ was $/,' were ')
+    if(!before)forms[id]=forms[id][0].toUpperCase()+forms[id].slice(1)
+   }
+   if(id!==own&&language==='tr'){
+    if(sourceIndex===44)forms[id]=turkishForm(term.text,n,'gen')+' içinden'
+    if(sourceIndex===18&&n===10)forms[id]='Senin'
+   }
    // Carry only the grammatical tail variation, never the old sentence wording.
    tails[id]=after
    if(language==='en'&&base.tails?.[id]!==base.after&&base.tails?.[id]){
@@ -31,7 +45,7 @@ export function getPromptCatalog(language){
     if(base.tails[id].startsWith(' was '))tails[id]=after.replace(/^ were /,' was ')
    }
   }
-  return {...base,text,before,answer,originalAfter,after,forms,tails,own,accepts:locale.answers.map(a=>a.id)}
+  return {...base,text,before,answer,originalAfter,after,forms,tails,heads,own,accepts:locale.answers.filter(a=>acceptsPhrase(sourceIndex,a,own)).map(a=>a.id)}
  })
  return cache[language]={sentences,byId:new Map(sentences.map(s=>[s.id,s]))}
 }

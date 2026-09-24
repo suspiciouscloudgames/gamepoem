@@ -1,8 +1,8 @@
 import {enablePoemReorder} from './poem-reorder.js?v=touch-recovery2'
-import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=phrase-without-demonstrative1'
-import {getBlackoutLocale, composeInLocale} from './blackout-locales.js?v=phrase-without-demonstrative1'
+import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=expanded-phrases1'
+import {getBlackoutLocale, composeInLocale} from './blackout-locales.js?v=expanded-phrases1'
 import {createPoemPictures} from './poem-pictures.js?v=ipad-safari2'
-import {canFill} from './blackout-content.js?v=phrase-without-demonstrative1'
+import {canFill} from './blackout-content.js?v=expanded-phrases1'
 export function setupBlackout({room,startConnection,send}){
   const tablet=document.querySelector('#tablet')
   tablet.className='blackout-tablet running'
@@ -55,7 +55,7 @@ export function setupBlackout({room,startConnection,send}){
   function appendRanges(parent,parts){
     parts.forEach(p=>{
       if(!p.id){parent.append(document.createTextNode(p.text));return}
-      const span=document.createElement('span');span.dataset.id=p.id
+      const span=document.createElement('span');span.dataset.id=p.id;if(p.atomic)span.className='phrase-unit'
       appendRanges(span,p.children);parent.append(span);nodes.push({el:span,...p})
     })
   }
@@ -110,7 +110,7 @@ export function setupBlackout({room,startConnection,send}){
 
   function paint(){
     sentence.textContent=''
-    sentence.append(document.createTextNode(current.before))
+    sentence.append(document.createTextNode(selected?(current.heads?.[selected.id]??current.before):current.before))
     const blank=document.createElement('span');blank.className=selected?'blackout-fill':'blackout-blank';blank.textContent=selected?current.forms[selected.id]:current.answer
     if(!selected)blank.setAttribute('aria-label','빈칸')
     sentence.append(blank,document.createTextNode(selected?(current.tails?.[selected.id]??current.after):current.originalAfter))
@@ -239,6 +239,17 @@ export function setupBlackout({room,startConnection,send}){
       const center=(rect.top+rect.bottom)/2
       rect.line=0
       for(let i=1;i<lineCenters.length;i++)if(Math.abs(lineCenters[i]-center)<Math.abs(lineCenters[rect.line]-center))rect.line=i
+    }
+    // Nested short words can give one phrase several rectangles on the same row.
+    // Merge those rectangles so its centre selects the whole phrase, not only its tail.
+    for(const g of geometry){
+      const rows=new Map()
+      for(const r of g.rects){
+        const merged=rows.get(r.line)
+        if(merged){merged.left=Math.min(merged.left,r.left);merged.right=Math.max(merged.right,r.right);merged.top=Math.min(merged.top,r.top);merged.bottom=Math.max(merged.bottom,r.bottom)}
+        else rows.set(r.line,{...r})
+      }
+      g.rects=[...rows.values()]
     }
     activeLine=-1;candidateKey=null
     locate()

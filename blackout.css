@@ -20,6 +20,7 @@
 .blackout-viewport{z-index:0;background:var(--page);position:absolute;top:0;right:0;bottom:0;left:0;overflow:hidden;clip-path:inset(100%);-webkit-clip-path:inset(100%);pointer-events:none}
 .blackout-text{padding:32px 26px 96px;background:var(--page);color:var(--page-ink);font-weight:400;font-size:18px;line-height:2.1;letter-spacing:0;word-spacing:normal;text-align:left;word-break:keep-all;overflow-wrap:anywhere;will-change:transform}
 .blackout-text span{display:inline;white-space:normal;line-height:inherit}
+.blackout-text span.phrase-unit,.blackout-text span.phrase-unit span{white-space:nowrap}
 .blackout-text span.target{color:var(--page-ink);text-decoration:none}
 .blackout-lens{position:absolute;z-index:1;border:0;pointer-events:none}
 .blackout-lens::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(90deg,rgba(64,160,178,.32) 0%,rgba(88,182,196,.44) 88%,rgba(136,211,219,.54) 100%);box-shadow:inset -2px 0 0 rgba(58,144,161,.88);transform:scaleX(0);transform-origin:left center;pointer-events:none}

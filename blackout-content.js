@@ -1,3 +1,4 @@
+import {extraPhrases} from './blackout-extra-phrases.js?v=expanded1'
 // Bars author one redaction per sentence; removing them restores the supplied captions.
 const source = `먼 곳을 바라보던 인간은 |자신에게 가장 내밀한 것|과 닮은 무언가와 마주했다.
 은하에서 온 빛의 미세한 굴절을 분석하던 연구자들은 |어떤 천체나 물질의 신호|로도 설명되지 않는 패턴을 발견했다.
@@ -91,8 +92,8 @@ export const sentences = source.split('\n').map((line, index) => {
  return {id:`blackout-s-${index}`,kind:'sentence',before,answer,originalAfter,after:originalAfter,text:before+answer+originalAfter}
 })
 export const transcript=sentences.map(s=>s.text).join(' ')
-const answerTexts=[...new Set(choices.flatMap(row=>row.map(value=>typeof value==='number'?sentences[value].answer:value)))]
-export const answers=answerTexts.map((text,index)=>({id:`blackout-phrase-${index}`,kind:'answer',text}))
+const answerTexts=[...new Set([...choices.flatMap(row=>row.map(value=>typeof value==='number'?sentences[value].answer:value)),...extraPhrases.map(p=>p.ko)])]
+export const answers=answerTexts.map((text,index)=>({id:`blackout-phrase-${index}`,kind:'answer',text,atomic:extraPhrases.some(p=>p.ko===text)}))
 const byText=new Map(answers.map(a=>[a.text,a]))
 sentences.forEach((sentence,index)=>{
  sentence.accepts=[...new Set(choices[index].map(value=>byText.get(typeof value==='number'?sentences[value].answer:value).id))]

@@ -1,4 +1,5 @@
-import * as ko from './blackout-content.js?v=phrase-without-demonstrative1'
+import {extraPhrases,extraPhraseOffset,extraPhrase} from './blackout-extra-phrases.js?v=expanded1'
+import * as ko from './blackout-content.js?v=expanded-phrases1'
 import {translations} from './blackout-translations.js?v=revised-film1'
 const cache={ko:{...ko,answerById:new Map(ko.answers.map(a=>[a.id,a]))}}
 const number=id=>Number(id.split('-').pop())
@@ -20,10 +21,11 @@ export function turkishForm(base,id,kind){
  const vowels=base.toLocaleLowerCase('tr').match(/[aeıioöuüâîû]/g)||['e']
  const last=vowels[vowels.length-1].replace('â','a').replace('î','i').replace('û','u')
  const a='aıou'.includes(last)?'a':'e',i='aı'.includes(last)?'ı':'ei'.includes(last)?'i':'ou'.includes(last)?'u':'ü'
- const vowel=/[aeıioöuü]$/i.test(base),p=possessed.has(id)
+ const vowel=/[aeıioöuü]$/i.test(base),p=possessed.has(id)||Boolean(extraPhrases[id-extraPhraseOffset]?.possessed)
  let stem=base
  if(['acc','dat','gen'].includes(kind)){
-  if((id===69||id===70)&&base.endsWith('k'))stem=base.slice(0,-1)
+  if(extraPhrases[id-extraPhraseOffset]?.trStem)stem=extraPhrases[id-extraPhraseOffset].trStem
+  else if((id===69||id===70)&&base.endsWith('k'))stem=base.slice(0,-1)
   else if(/(?:varlık|köpek|yiyecek|yakınlık|bağlılık)$/.test(base))stem=base.slice(0,-1)+'ğ'
  }
  const nowVowel=/[aeıioöuü]$/i.test(stem)
@@ -34,7 +36,8 @@ export function turkishForm(base,id,kind){
  const d=/[fstkçşhp]$/.test(base)?'t':'d'
  return base+(p?'n':'')+d+a+(kind==='abl'?'n':'')
 }
-const plural=new Set([1,2,4,5,6,8,11,13,17,18,19,20,21,22,26,27,33,34,35,46,49,56,57,64,65])
+const plural=new Set([1,2,4,8,10,11,13,17,18,19,20,21,22,26,27,33,34,35,36,49,56,57,64,65,...extraPhrases.flatMap((p,i)=>p.plural?[i+extraPhraseOffset]:[])])
+export const englishPlural=id=>plural.has(number(id))
 function englishForm(base,id,slot){
  if(slot===15)return base+' was'
  if(slot===29)return 'no '+base.replace(/^(?:a|the) /,'')
@@ -51,7 +54,7 @@ export function getBlackoutLocale(language){
  if(cache[language])return cache[language]
  const data=translations[language]
  if(!data)return cache.ko
- const answers=ko.answers.map(a=>({...a,text:data.terms[number(a.id)]}))
+ const answers=ko.answers.map(a=>({...a,text:extraPhrase(a.id)?.[language]??data.terms[number(a.id)]}))
  const answerById=new Map(answers.map(a=>[a.id,a]))
  const sentences=ko.sentences.map((original,index)=>{
   const text=data.texts[index],answer=data.slots[index],start=text.indexOf(answer)
@@ -73,7 +76,7 @@ export function getBlackoutLocale(language){
  })
  const transcript=data.texts.join(' '),aliases=[]
  for(const a of answers){
-  const id=number(a.id),names=new Set([a.text,...((language==='en'?enAliases:trAliases)[id]||[])])
+  const id=number(a.id),names=new Set([a.text,...((language==='en'?enAliases:trAliases)[id]||[]),...(extraPhrase(a.id)?.[language+'Aliases']||[])])
   if(language==='tr')for(const kind of ['acc','dat','loc','abl','gen','ins'])names.add(turkishForm(a.text,id,kind))
   for(const sentence of sentences)if(sentence.own===a.id)names.add(sentence.answer)
   for(const name of names)if(name)aliases.push({...a,text:name})
@@ -104,4 +107,4 @@ export function getBlackoutLocale(language){
  cache[language]=result
  return result
 }
-export function composeInLocale(sentence,answer){return sentence.before+sentence.forms[answer.id]+(sentence.tails?.[answer.id]??sentence.after)}
+export function composeInLocale(sentence,answer){return (sentence.heads?.[answer.id]??sentence.before)+sentence.forms[answer.id]+(sentence.tails?.[answer.id]??sentence.after)}

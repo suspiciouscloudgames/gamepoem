@@ -1,6 +1,6 @@
-import {connectPoemEnding} from './projection-poem.js?v=phrase-without-demonstrative1'
-import {setupBlackout} from './blackout.js?v=phrase-without-demonstrative1'
-import {fragmentById as byId} from './blackout-content.js?v=phrase-without-demonstrative1'
+import {connectPoemEnding} from './projection-poem.js?v=expanded-phrases1'
+import {setupBlackout} from './blackout.js?v=expanded-phrases1'
+import {fragmentById as byId} from './blackout-content.js?v=expanded-phrases1'
 import {isEmission,clamp} from './interaction.js?v=portrait1'
 import {createSeaEffects} from './effects.js?v=pulmo1'
 const params=new URLSearchParams(location.search)
