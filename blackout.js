@@ -31,15 +31,16 @@ export function setupBlackout({room,startConnection,send}){
   const poem=document.createElement('aside');poem.className='blackout-poem';poem.tabIndex=0
   poem.setAttribute('aria-label','관객의 시');poem.setAttribute('aria-live','polite')
   const poemLines=document.createElement('div');poemLines.className='blackout-poem-lines';poem.append(poemLines)
-  let reading=false
+  let reading=false,editorScrollTop=0
   const finishPoem=document.createElement('button');finishPoem.type='button';finishPoem.className='poem-finish';finishPoem.disabled=true
   function updateFinish(){
+    tablet.classList.toggle('reading-mode',reading)
     finishPoem.textContent=reading?{ko:'다시 편집',en:'Edit poem',tr:'Düzenle'}[language]:{ko:'당신의 시',en:'Your poem',tr:'Senin şiirin'}[language]
     finishPoem.setAttribute('aria-pressed',String(reading));finishPoem.disabled=ending||!poemNodes.size
   }
   finishPoem.addEventListener('click',()=>{
     if(ending)return
-    interrupt();if(pendingCompletion)finishCompletion();reading=!reading;memory.classList.toggle('reading',reading);updateFinish();poem.scrollTop=0
+    interrupt();if(pendingCompletion)finishCompletion();if(!reading)editorScrollTop=poem.scrollTop;reading=!reading;memory.classList.toggle('reading',reading);updateFinish();poem.scrollTop=reading?0:editorScrollTop
     poemNodes.forEach(line=>{line.tabIndex=reading?-1:0})
     token=`blackout-${Date.now()}-${Math.random().toString(36).slice(2)}`;send(snapshot())
   })

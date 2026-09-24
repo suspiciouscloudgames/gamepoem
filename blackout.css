@@ -96,3 +96,13 @@
 .blackout-memory.reading .blackout-poem p,.blackout-memory.reading .blackout-poem p.current{min-height:0;margin:0 0 14px;padding:0;background:transparent;color:#302e28;text-shadow:none;cursor:text;touch-action:pan-y}
 .blackout-memory.reading .poem-delete{display:none}
 #tablet.blackout-tablet .blackout-memory.reading .poem-finish{color:#716b60;background:transparent;margin-bottom:12px}
+
+/* A finished poem opens as a full iPad page; editing stays intact underneath. */
+#tablet.blackout-tablet.reading-mode{background:#ede9df}
+#tablet.reading-mode>.blackout-work,#tablet.reading-mode>.blackout-languages,#tablet.reading-mode>.poem-title{visibility:hidden;pointer-events:none}
+#tablet.reading-mode>.blackout-memory.reading{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;width:100%;height:100%;margin:0;isolation:isolate;background:#ede9df;color-scheme:light}
+#tablet.reading-mode .blackout-poem{padding:clamp(48px,9vh,90px) clamp(28px,12vw,160px) 36px}
+#tablet.reading-mode .blackout-poem-lines{max-width:660px;margin:0 auto}
+#tablet.reading-mode .blackout-poem p{font-size:17px;line-height:1.95;margin-bottom:18px}
+#tablet.reading-mode[data-language=en] .blackout-poem p,#tablet.reading-mode[data-language=tr] .blackout-poem p{font-size:16px;line-height:1.9}
+#tablet.blackout-tablet.reading-mode .poem-finish{margin:0 0 max(24px,env(safe-area-inset-bottom));min-height:44px}
