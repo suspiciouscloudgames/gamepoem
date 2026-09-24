@@ -1,5 +1,5 @@
-import {getPromptCatalog} from './blackout-prompts.js?v=expanded-phrases1'
-import {getBlackoutLocale,composeInLocale} from './blackout-locales.js?v=expanded-phrases1'
+import {getPromptCatalog} from './blackout-prompts.js?v=word-boundaries1'
+import {getBlackoutLocale,composeInLocale} from './blackout-locales.js?v=word-boundaries1'
 // Only an explicitly finalized poem is eligible; reset follows the actual film restart.
 export function connectPoemEnding({complete,progress}){
   let latest=null,showing=false,shownToken=null,hideTimer=null,scrollFrame=null

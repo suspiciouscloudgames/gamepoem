@@ -1,5 +1,5 @@
 import {extraPhrases,extraPhraseOffset,extraPhrase} from './blackout-extra-phrases.js?v=expanded1'
-import * as ko from './blackout-content.js?v=expanded-phrases1'
+import * as ko from './blackout-content.js?v=word-boundaries1'
 import {translations} from './blackout-translations.js?v=revised-film1'
 const cache={ko:{...ko,answerById:new Map(ko.answers.map(a=>[a.id,a]))}}
 const number=id=>Number(id.split('-').pop())

@@ -111,11 +111,18 @@ sentences.forEach((sentence,index)=>{
 // Keep every character of the supplied text; only authored ranges are selectable.
 // Greedy longest matches keep complete phrases intact instead of chopping words.
 const sorted=answers.slice().sort((a,b)=>b.text.length-a.text.length)
+const shortNounParticles=new Set(['','이','가','은','는','을','를','의','도','만','과','와','에','에서','에게','에게서','로','으로','처럼','마저','조차','부터','까지','보다'])
+function wholeShortNoun(part,offset,word){
+ if(word!=='비'&&word!=='개')return true
+ if(/[가-힣]/.test(part[offset-1]||''))return false
+ const suffix=part.slice(offset+word.length).match(/^[가-힣]*/)[0]
+ return shortNounParticles.has(suffix)
+}
 function markRanges(part,excluded=new Set()){
  const result=[]
  let offset=0,plain=''
  while(offset<part.length){
-  const answer=sorted.find(a=>!excluded.has(a.id)&&part.startsWith(a.text,offset))
+  const answer=sorted.find(a=>!excluded.has(a.id)&&part.startsWith(a.text,offset)&&wholeShortNoun(part,offset,a.text))
   if(answer){
    if(plain){result.push({text:plain});plain=''}
    result.push({...answer,children:markRanges(answer.text,new Set([...excluded,answer.id]))})
