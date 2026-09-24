@@ -27,19 +27,19 @@ export function setupBlackout({room,startConnection,send}){
   const work=document.createElement('div');work.className='blackout-work'
   const memory=document.createElement('div');memory.className='blackout-memory'
   const pictures=createPoemPictures(memory)
-  const poemTitle=document.createElement('h2');poemTitle.className='poem-title';poemTitle.textContent='Poiesis Machine';poemTitle.lang='en';tablet.append(poemTitle)
+  const poemTitle=document.createElement('h2');poemTitle.className='poem-title';poemTitle.textContent='Game Poem';poemTitle.lang='en';tablet.append(poemTitle)
   const poem=document.createElement('aside');poem.className='blackout-poem';poem.tabIndex=0
   poem.setAttribute('aria-label','관객의 시');poem.setAttribute('aria-live','polite')
   const bookHeading=document.createElement('header');bookHeading.className='poem-book-heading'
-  const bookLabel=document.createElement('span');bookLabel.textContent='Poiesis Machine';bookLabel.lang='en'
+  const bookLabel=document.createElement('span');bookLabel.textContent='Game Poem';bookLabel.lang='en'
   const bookTitle=document.createElement('h2');bookHeading.append(bookLabel,bookTitle)
   const poemLines=document.createElement('div');poemLines.className='blackout-poem-lines';poem.append(bookHeading,poemLines)
   let reading=false,editorScrollTop=0
   const finishPoem=document.createElement('button');finishPoem.type='button';finishPoem.className='poem-finish';finishPoem.disabled=true
   function updateFinish(){
     tablet.classList.toggle('reading-mode',reading)
-    bookTitle.textContent={ko:'당신의 시',en:'Your poem',tr:'Senin şiirin'}[language]
-    finishPoem.textContent=reading?{ko:'다시 편집',en:'Edit poem',tr:'Düzenle'}[language]:{ko:'당신의 시',en:'Your poem',tr:'Senin şiirin'}[language]
+    bookTitle.textContent={ko:'읽기',en:'Read',tr:'Oku'}[language]
+    finishPoem.textContent=reading?{ko:'다시 편집',en:'Edit again',tr:'Yeniden düzenle'}[language]:{ko:'읽기',en:'Read',tr:'Oku'}[language]
     finishPoem.setAttribute('aria-pressed',String(reading));finishPoem.disabled=ending||!poemNodes.size
   }
   finishPoem.addEventListener('click',()=>{
