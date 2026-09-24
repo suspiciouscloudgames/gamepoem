@@ -1,4 +1,4 @@
-import {enablePoemReorder} from './poem-reorder.js?v=delete-lines1'
+import {enablePoemReorder} from './poem-reorder.js?v=touch-recovery2'
 import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=revised-film1'
 import {getBlackoutLocale, composeInLocale} from './blackout-locales.js?v=revised-film1'
 import {createPoemPictures} from './poem-pictures.js?v=ipad-safari2'
@@ -64,6 +64,7 @@ export function setupBlackout({room,startConnection,send}){
   let index=0,current=prompts.byId.get(deck[0].id),selected=null,candidate=null,timer=null,pointer=null,token='',ending=false
   let completionTimer=null,pendingCompletion=false
   let x=.5,y=.12,lensWidth=116,lensHeight=36,geometry=[],lineCenters=[],activeLine=-1,candidateKey=null
+  let touchPoint=null,grabX=0,grabY=0,lift=1,liftFrame=0,liftStart=0,windowBox=null,visualX=0,visualY=0,fromX=0,fromY=0
   const snapshot=()=>poemNodes.size?[{kind:'poem',token,language,finalized:reading,lines:[...poemLines.children].map(node=>node.dataset.sentenceId),fills:[...poemLines.children].map(node=>({sentenceId:node.dataset.sentenceId,answerId:node.dataset.answerId,lineId:node.dataset.lineId}))}]:[]
   const reorder=enablePoemReorder(poemLines,poem,{disabled:()=>ending||reading,onStart:cancel,onChange:()=>{
     token=`blackout-${Date.now()}-${Math.random().toString(36).slice(2)}`;send(snapshot())
@@ -201,10 +202,7 @@ export function setupBlackout({room,startConnection,send}){
     lensWidth=Math.min(width,sentence.clientWidth,Math.max(44,bestRect?Math.ceil(2*Math.max(cx-bestRect.left,bestRect.right-cx)+12):116))
     left=Math.max(0,Math.min(width-lensWidth,cx-lensWidth/2))
     x=left/Math.max(1,width-lensWidth)
-    lens.style.cssText=`left:${left}px;top:${top}px;width:${lensWidth}px;height:${lensHeight}px`
-    viewport.style.clipPath=`inset(${top}px ${width-left-lensWidth}px ${height-top-lensHeight}px ${left}px)`
-    viewport.style.webkitClipPath=viewport.style.clipPath
-    text.style.transform=`translateY(${-scroll}px)`
+    windowBox={left,top,scroll,width,height};renderWindow()
     // The whole source phrase must be visible, including every rendered rectangle.
     const visibleTop=top+scroll,tolerance=.5
     if(bestGeometry&&!bestGeometry.rects.every(r=>r.left>=left-tolerance&&r.right<=left+lensWidth+tolerance&&r.top>=visibleTop-tolerance&&r.bottom<=visibleTop+lensHeight+tolerance))best=null
@@ -245,11 +243,60 @@ export function setupBlackout({room,startConnection,send}){
     activeLine=-1;candidateKey=null
     locate()
   }
-  function move(e){const r=field.getBoundingClientRect();x=Math.max(0,Math.min(1,(e.clientX-r.left-lensWidth/2)/Math.max(1,r.width-lensWidth)));y=Math.max(0,Math.min(1,(e.clientY-r.top-lensHeight/2)/Math.max(1,r.height-lensHeight)));locate(true)}
-  field.addEventListener('pointerdown',e=>{if(ending||reading||pendingCompletion||pointer!==null||e.button>0)return;e.preventDefault();pointer=e.pointerId;try{field.setPointerCapture(pointer)}catch{}move(e)})
+  function renderWindow(){
+    if(!windowBox)return
+    const {left,top,scroll,width,height}=windowBox
+    let targetX=0,targetY=0
+    if(touchPoint){
+      // Move the aperture and the underlying text together: the reading row and
+      // valid phrase stay unchanged during the lift, including at the edges.
+      let cx=touchPoint.x,cy=touchPoint.y-76
+      if(cy<lensHeight/2){
+        const clearance=lensWidth/2+40
+        cx=touchPoint.x+clearance<=width-lensWidth/2?touchPoint.x+clearance:touchPoint.x-clearance
+        cy=touchPoint.y
+        if(cx<lensWidth/2){cx=touchPoint.x;cy=touchPoint.y+76}
+      }
+      targetX=Math.max(0,Math.min(width-lensWidth,cx-lensWidth/2))-left
+      targetY=Math.max(0,Math.min(height-lensHeight,cy-lensHeight/2))-top
+    }
+    const ease=1-Math.pow(1-lift,3)
+    visualX=fromX+(targetX-fromX)*ease;visualY=fromY+(targetY-fromY)*ease
+    const visibleLeft=left+visualX,visibleTop=top+visualY
+    lens.style.cssText=`left:${visibleLeft}px;top:${visibleTop}px;width:${lensWidth}px;height:${lensHeight}px`
+    viewport.style.clipPath=`inset(${visibleTop}px ${Math.max(0,width-visibleLeft-lensWidth)}px ${Math.max(0,height-visibleTop-lensHeight)}px ${visibleLeft}px)`
+    viewport.style.webkitClipPath=viewport.style.clipPath
+    text.style.transform=`translate(${visualX}px,${visualY-scroll}px)`
+  }
+  function animateLift(now){
+    lift=Math.min(1,(now-liftStart)/180);renderWindow()
+    if(lift<1)liftFrame=requestAnimationFrame(animateLift)
+    else{liftFrame=0;if(!pendingCompletion&&!reading&&!ending)locate(true)}
+  }
+  function move(e){
+    const r=field.getBoundingClientRect()
+    if(touchPoint)touchPoint={x:e.clientX-r.left,y:e.clientY-r.top}
+    x=Math.max(0,Math.min(1,(e.clientX-r.left+grabX-lensWidth/2)/Math.max(1,r.width-lensWidth)))
+    y=Math.max(0,Math.min(1,(e.clientY-r.top+grabY-lensHeight/2)/Math.max(1,r.height-lensHeight)))
+    locate(lift===1)
+  }
+  field.addEventListener('pointerdown',e=>{
+    if(ending||reading||pendingCompletion||pointer!==null||e.button>0)return
+    e.preventDefault();pointer=e.pointerId;cancelAnimationFrame(liftFrame);cancel()
+    const r=field.getBoundingClientRect(),l=lens.getBoundingClientRect()
+    const grabbed=e.clientX>=l.left&&e.clientX<=l.right&&e.clientY>=l.top&&e.clientY<=l.bottom
+    const touch=e.pointerType==='touch'||e.pointerType==='pen'
+    grabX=touch&&grabbed&&windowBox?windowBox.left+lensWidth/2-(e.clientX-r.left):0
+    grabY=touch&&grabbed&&windowBox?windowBox.top+lensHeight/2-(e.clientY-r.top):0
+    touchPoint=touch?{x:e.clientX-r.left,y:e.clientY-r.top}:null
+    fromX=touch&&grabbed?visualX:0;fromY=touch&&grabbed?visualY:0;lift=touch?0:1
+    try{field.setPointerCapture(pointer)}catch{}
+    move(e)
+    if(touch){liftStart=performance.now();liftFrame=requestAnimationFrame(animateLift)}
+  })
   window.addEventListener('pointermove',e=>{if(e.pointerId===pointer){e.preventDefault();move(e)}},{passive:false})
   window.addEventListener('pointerup',e=>{if(e.pointerId===pointer){move(e);pointer=null}})
-  function interrupt(){pointer=null;cancel();reorder.cancel()}
+  function interrupt(){pointer=null;cancelAnimationFrame(liftFrame);liftFrame=0;lift=1;cancel();reorder.cancel()}
   window.addEventListener('pointercancel',e=>{if(e.pointerId===pointer)interrupt()})
   field.addEventListener('lostpointercapture',e=>{if(e.pointerId===pointer)interrupt()})
   window.addEventListener('blur',interrupt)
@@ -274,5 +321,5 @@ export function setupBlackout({room,startConnection,send}){
     selected=null;candidate?.el.classList.remove('target');candidate=null;candidateKey=null;token=''
     lens.classList.remove('chosen');updateFinish();paint();measure();send([])
   }
-  startConnection({display:false,room,getState:snapshot,onControl:resetCompletedPoem,onProgress(data){ending=data.phase==='ending';if(ending){interrupt();finishCompletion()}updateFinish();poemNodes.forEach(line=>line.querySelector('.poem-delete').disabled=ending);paint()}})
+  startConnection({display:false,room,getState:snapshot,onControl:resetCompletedPoem,onProgress(data){ending=data.phase==='ending';if(ending){interrupt();finishCompletion()}updateFinish();poemNodes.forEach(line=>line.querySelector('.poem-delete').disabled=ending)}})
 }

@@ -34,7 +34,7 @@ export function enablePoemReorder(container, scroller, {disabled, onChange, onSt
     onStart?.()
     const r=line.getBoundingClientRect()
     drag={line,pointer:e.pointerId,order:items(),start:e.clientY,y:e.clientY,offset:e.clientY-r.top,rect:r}
-    container.setPointerCapture(e.pointerId)
+    try{container.setPointerCapture(e.pointerId)}catch{finish();return}
   })
   window.addEventListener('pointermove',e=>{
     if(!drag||e.pointerId!==drag.pointer)return
