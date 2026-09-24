@@ -7,7 +7,7 @@
 }
 #tablet[data-language=en],#tablet[data-language=tr]{--reading-font:Georgia,'Times New Roman',serif}
 .blackout-languages{grid-column:1;grid-row:1;display:flex;align-items:center;justify-content:flex-start;gap:4px;font-family:var(--reading-font);border:0;box-shadow:none;background:transparent}
-.blackout-languages button{min-height:44px;min-width:92px;padding:0 20px;border:0;border-radius:24px;box-shadow:none;text-decoration:none;font-size:14px;font-weight:400;letter-spacing:.015em;color:#99978f;background:transparent;white-space:nowrap;transition:background-color .2s,color .2s}
+.blackout-languages button{min-height:34px;min-width:0;padding:0 12px;border:0;border-radius:24px;box-shadow:none;text-decoration:none;font-size:14px;font-weight:400;letter-spacing:.015em;color:#99978f;background:transparent;white-space:nowrap;transition:background-color .2s,color .2s}
 .blackout-languages button[lang=ko]{font-family:'Nanum Myeongjo',serif}
 .blackout-languages button[lang=tr],.blackout-languages button[lang=en]{font-family:Georgia,'Times New Roman',serif}
 #tablet.blackout-tablet .blackout-languages button[aria-pressed=true]{color:var(--ink);background:#30312d}
@@ -88,7 +88,7 @@
 .blackout-memory .blackout-poem{padding-top:48px}
 @media(orientation:portrait){.blackout-memory{grid-column:1;grid-row:3;flex-direction:column}.poem-title{grid-column:1;grid-row:3;align-self:start;font-size:14px;padding:0}.blackout-memory{margin-top:30px}.blackout-languages button{min-width:0;padding:0 10px;font-size:12px}.blackout-languages{justify-self:start;gap:0}}
 
-#tablet.blackout-tablet .poem-finish{position:relative;z-index:1;flex:0 0 auto;align-self:center;min-height:44px;margin:12px 0 16px;padding:0 22px;border:0;border-radius:24px;background:#333530e8;color:var(--ink);font-family:inherit;font-size:13px;font-weight:400}
+#tablet.blackout-tablet .poem-finish{position:relative;z-index:1;flex:0 0 auto;align-self:center;min-height:36px;margin:12px 0 16px;padding:0 14px;border:0;border-radius:24px;background:#333530e8;color:var(--ink);font-family:inherit;font-size:13px;font-weight:400}
 .poem-finish:disabled{visibility:hidden}
 .blackout-memory.reading{background:var(--page);color:var(--page-ink)}
 .blackout-memory.reading .poem-pictures{display:none}
@@ -100,18 +100,18 @@
 .poem-book-heading{display:none}
 #tablet.blackout-tablet.reading-mode{background:var(--paper)}
 #tablet.reading-mode>.blackout-work,#tablet.reading-mode>.blackout-languages,#tablet.reading-mode>.poem-title{visibility:hidden;pointer-events:none}
-#tablet.reading-mode>.blackout-memory.reading{position:fixed;top:0;right:0;bottom:0;left:0;z-index:100;display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;height:var(--viewport-height,100vh);margin:0;padding:28px 40px calc(48px + env(safe-area-inset-bottom,0px));isolation:isolate;background:var(--paper);color-scheme:light}
+#tablet.reading-mode>.blackout-memory.reading{position:fixed;top:0;right:0;bottom:0;left:0;z-index:100;display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;align-items:stretch;gap:32px;width:100%;height:var(--viewport-height,100vh);margin:0;padding:28px 40px calc(32px + env(safe-area-inset-bottom,0px));isolation:isolate;background:var(--paper);color-scheme:light}
 #tablet.reading-mode .blackout-poem{flex:1;min-height:0;width:100%;max-width:880px;padding:clamp(80px,14vh,120px) 52px 64px;background:linear-gradient(90deg,#e6e1d6 0,var(--page) 2.5%,var(--page) 97%,#e8e3d9 100%);box-shadow:3px 3px 0 #c3bba9,6px 6px 0 #a39b8c,0 16px 42px #0006;scrollbar-color:#bfb6a3 transparent}
 #tablet.reading-mode .poem-book-heading{display:none}
 .poem-book-heading>span{display:block;font-family:Georgia,serif;font-size:10px;line-height:1.5;letter-spacing:.14em;color:#81796b}
 .poem-book-heading>h2{margin:14px 0 0;font:inherit;font-size:23px;font-weight:400;line-height:1.5;color:#39372f}
 #tablet.reading-mode .blackout-poem-lines{max-width:660px;margin:0 auto}
-#tablet.reading-mode .blackout-poem p{font-size:16px;line-height:1.95;margin-bottom:10px}
-#tablet.reading-mode[data-language=en] .blackout-poem p,#tablet.reading-mode[data-language=tr] .blackout-poem p{font-size:15px;line-height:1.9}
-#tablet.blackout-tablet.reading-mode .poem-finish{flex:0 0 auto;min-width:168px;min-height:48px;margin:0;padding:0 26px;border-radius:24px;background:var(--page);color:var(--page-ink);font-size:14px;font-weight:400;box-shadow:0 4px 14px #0003}
+#tablet.reading-mode .blackout-poem p{font-size:16px;line-height:1.6;margin-bottom:3px}
+#tablet.reading-mode[data-language=en] .blackout-poem p,#tablet.reading-mode[data-language=tr] .blackout-poem p{font-size:15px;line-height:1.6}
+#tablet.blackout-tablet.reading-mode .poem-finish{flex:0 0 auto;min-width:0;min-height:36px;margin:0;padding:0 14px;border-radius:24px;background:var(--page);color:var(--page-ink);font-size:14px;font-weight:400;box-shadow:0 4px 14px #0003}
 #tablet.blackout-tablet.reading-mode .poem-finish:focus-visible{background:var(--page);color:var(--page-ink);outline:2px solid var(--ink);outline-offset:4px}
-@media(max-width:700px){#tablet.reading-mode>.blackout-memory.reading{padding:20px 22px;gap:18px}#tablet.reading-mode .blackout-poem{padding:80px 24px 44px}}
-@media(max-height:650px){#tablet.reading-mode>.blackout-memory.reading{padding-top:16px;padding-bottom:calc(36px + env(safe-area-inset-bottom,0px));gap:16px}#tablet.reading-mode .blackout-poem{padding-top:72px}}
+@media(max-width:700px){#tablet.reading-mode>.blackout-memory.reading{padding:20px 22px;gap:28px}#tablet.reading-mode .blackout-poem{padding:80px 24px 44px}}
+@media(max-height:650px){#tablet.reading-mode>.blackout-memory.reading{padding-top:16px;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));gap:28px}#tablet.reading-mode .blackout-poem{padding-top:72px}}
 
 /* The projection iframe must not render the tablet editor over the film. */
 .display #tablet.blackout-tablet{display:none}
