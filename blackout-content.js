@@ -1,4 +1,4 @@
-import {limitRepeatedRanges} from './blackout-range-limits.js?v=two-occurrences1'
+import {limitRepeatedRanges} from './blackout-range-limits.js?v=grammar-review1'
 import {extraPhrases} from './blackout-extra-phrases.js?v=expanded1'
 // Bars author one redaction per sentence; removing them restores the supplied captions.
 const source = `먼 곳을 바라보던 인간은 |자신에게 가장 내밀한 것|과 닮은 무언가와 마주했다.

@@ -1,5 +1,5 @@
-import {acceptsPhrase,englishNoun} from './blackout-phrase-grammar.js?v=expanded1'
-import {getBlackoutLocale,turkishForm,englishPlural} from './blackout-locales.js?v=two-occurrences1'
+import {acceptsPhrase,englishNoun,englishNegativeNoun,turkishQuestionParticle} from './blackout-phrase-grammar.js?v=grammar-review1'
+import {getBlackoutLocale,turkishForm,englishPlural} from './blackout-locales.js?v=grammar-review1'
 import {promptIndices,promptTexts} from './blackout-prompt-texts.js?v=prompts38-1'
 const cache={}
 export function getPromptCatalog(language){
@@ -29,21 +29,24 @@ export function getPromptCatalog(language){
    if(id!==own&&language==='en'){
     const noun=englishNoun(term.text,id)
     // Use complete noun phrases and agreement instead of inserting an infinitive or adverb.
-    if(n===59||n===70)forms[id]=sourceIndex===29?'no '+noun.replace(/^(?:a|the|this) /,''):sourceIndex===31?noun+' had not quite left':sourceIndex===34?'maintain '+noun:noun
+    forms[id]=sourceIndex===29?englishNegativeNoun(term.text,id):sourceIndex===31?noun+' had not quite left':sourceIndex===34?(n===3?'remain as calm as possible':'maintain '+noun):noun
     if(sourceIndex===44)forms[id]='through '+noun
     if(sourceIndex===19&&englishPlural(id))heads[id]=before.replace(/ was $/,' were ')
     if(!before)forms[id]=forms[id][0].toUpperCase()+forms[id].slice(1)
    }
    if(id!==own&&language==='tr'){
+    if(sourceIndex===37)forms[id]=turkishForm(term.text,n,'acc')
     if(sourceIndex===44)forms[id]=turkishForm(term.text,n,'gen')+' içinden'
     if(sourceIndex===18&&n===10)forms[id]='Senin'
    }
    // Carry only the grammatical tail variation, never the old sentence wording.
    tails[id]=after
+   if(id!==own&&language==='tr'&&sourceIndex===24)tails[id]=after.replace(/^ mı /,' '+turkishQuestionParticle(forms[id])+' ')
    if(language==='en'&&base.tails?.[id]!==base.after&&base.tails?.[id]){
     if(base.tails[id].startsWith(' were '))tails[id]=after.replace(/^ was /,' were ')
     if(base.tails[id].startsWith(' was '))tails[id]=after.replace(/^ were /,' was ')
    }
+   if(id!==own&&language==='en'&&sourceIndex===50)tails[id]=tails[id].replace(' ever ',' never ')
   }
   return {...base,text,before,answer,originalAfter,after,forms,tails,heads,own,accepts:locale.answers.filter(a=>acceptsPhrase(sourceIndex,a,own)).map(a=>a.id)}
  })

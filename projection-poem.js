@@ -1,5 +1,5 @@
-import {getPromptCatalog} from './blackout-prompts.js?v=two-occurrences1'
-import {getBlackoutLocale,composeInLocale} from './blackout-locales.js?v=two-occurrences1'
+import {getPromptCatalog} from './blackout-prompts.js?v=grammar-review1'
+import {getBlackoutLocale,composeInLocale} from './blackout-locales.js?v=grammar-review1'
 // Only an explicitly finalized poem is eligible; reset follows the actual film restart.
 export function connectPoemEnding({complete,progress}){
   let latest=null,showing=false,shownToken=null,hideTimer=null,scrollFrame=null

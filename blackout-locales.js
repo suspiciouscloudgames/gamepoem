@@ -1,11 +1,11 @@
-import {limitRepeatedRanges} from './blackout-range-limits.js?v=two-occurrences1'
+import {limitRepeatedRanges} from './blackout-range-limits.js?v=grammar-review1'
 import {extraPhrases,extraPhraseOffset,extraPhrase} from './blackout-extra-phrases.js?v=expanded1'
-import * as ko from './blackout-content.js?v=two-occurrences1'
+import * as ko from './blackout-content.js?v=grammar-review1'
 import {translations} from './blackout-translations.js?v=revised-film1'
 const cache={ko:{...ko,answerById:new Map(ko.answers.map(a=>[a.id,a]))}}
 const number=id=>Number(id.split('-').pop())
 const trCases=['dat','nom','nom','nom','loc','ins','nom','ins','nom','abl','acc','loc','nom','dat','dat','nom','loc','nom','nom','nom','acc','acc','past','ins','abl','acc','nom','loc','nom','nom','loc','clause','nom','gen','calm','acc','gen','nom','ins','dat','dat','nom','nom','acc','abl','nom','acc','nom','nom','nom','gen','nom','acc','nom']
-const possessed=new Set([1,5,6,14,17,18,19,20,32,39,40,42,43,45,46,47,49,59,63,64,66,67])
+const possessed=new Set([1,6,14,17,19,20,32,34,39,40,42,43,45,47,49,59,63,64,66,67])
 export function turkishForm(base,id,kind){
  if(kind==='nom')return base
  if(kind==='past')return base+' idi'
@@ -13,21 +13,23 @@ export function turkishForm(base,id,kind){
  if(kind==='calm')return id===3?'mümkün olduğunca sakin kalmaya':turkishForm(base,id,'acc')+' korumaya'
  const special={
  10:{acc:'seni',dat:'sana',loc:'sende',abl:'senden',gen:'senin',ins:'seninle'},
- 13:{acc:'evlerini ve sık vakit geçirdiğin yerleri',dat:'evlerine ve sık vakit geçirdiğin yerlere',loc:'evlerinde ve sık vakit geçirdikleri yerlerde',abl:'evlerinden ve sık vakit geçirdiğin yerlerden',gen:'evlerinin ve sık vakit geçirdiğin yerlerin',ins:'evlerinle ve sık vakit geçirdiğin yerlerle'},
+ 13:{acc:'kendi evlerini ve sık sık bulundukları yerleri',dat:'kendi evlerine ve sık sık bulundukları yerlere',loc:'kendi evlerinde ve sık sık bulundukları yerlerde',abl:'kendi evlerinden ve sık sık bulundukları yerlerden',gen:'kendi evlerinin ve sık sık bulundukları yerlerin',ins:'kendi evleriyle ve sık sık bulundukları yerlerle'},
+ 61:{acc:'neyi',dat:'neye',loc:'neyde',abl:'neyden',gen:'neyin',ins:'neyle'},
  59:{acc:'burayı',dat:'buraya',loc:'burada',abl:'buradan',gen:'buranın',ins:'burayla'},
  66:{acc:'orayı',dat:'oraya',loc:'orada',abl:'oradan',gen:'oranın',ins:'orayla'},
  71:{acc:'kendini',dat:'kendine',loc:'kendinde',abl:'kendinden',gen:'kendinin',ins:'kendinle'}
  }
  if(special[id]?.[kind])return special[id][kind]
  const vowels=base.toLocaleLowerCase('tr').match(/[aeıioöuüâîû]/g)||['e']
- const last=vowels[vowels.length-1].replace('â','a').replace('î','i').replace('û','u')
+ const last=/sinyal$/.test(base)?'e':vowels[vowels.length-1].replace('â','a').replace('î','i').replace('û','u')
  const a='aıou'.includes(last)?'a':'e',i='aı'.includes(last)?'ı':'ei'.includes(last)?'i':'ou'.includes(last)?'u':'ü'
  const vowel=/[aeıioöuü]$/i.test(base),p=possessed.has(id)||Boolean(extraPhrases[id-extraPhraseOffset]?.possessed)
  let stem=base
  if(['acc','dat','gen'].includes(kind)){
   if(extraPhrases[id-extraPhraseOffset]?.trStem)stem=extraPhrases[id-extraPhraseOffset].trStem
   else if((id===69||id===70)&&base.endsWith('k'))stem=base.slice(0,-1)
-  else if(/(?:varlık|köpek|yiyecek|yakınlık|bağlılık)$/.test(base))stem=base.slice(0,-1)+'ğ'
+  else if(/isim$/.test(base))stem=base.slice(0,-4)+'ism'
+  else if(/(?:varlık|köpek|yiyecek|yakınlık|bağlılık|sakinlik)$/.test(base))stem=base.slice(0,-1)+'ğ'
  }
  const nowVowel=/[aeıioöuü]$/i.test(stem)
  if(kind==='acc')return stem+(p?'n':nowVowel?'y':'')+i
