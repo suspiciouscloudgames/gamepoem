@@ -14,7 +14,7 @@
 .blackout-work{grid-column:1;grid-row:2;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
 .blackout-upper{flex:0 0 25%;min-height:156px;padding:10px 28px 16px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
 .blackout-sentence{position:relative;display:block;width:100%;margin:0;padding:0;text-align:left;font:inherit;font-size:20px;line-height:1.65;letter-spacing:-.015em;word-break:keep-all;overflow-wrap:anywhere;color:var(--ink);flex-shrink:0}
-.blackout-blank{width:var(--slot-width,116px);height:var(--slot-height,27px);min-width:0;max-width:100%;display:inline-block;white-space:nowrap;line-height:1.25;vertical-align:middle;overflow:hidden;background:#20201e;color:transparent;padding:2px 3px}
+.blackout-blank{width:auto;height:auto;min-width:0;max-width:100%;display:inline-block;white-space:nowrap;line-height:1.25;vertical-align:middle;overflow:hidden;background:#20201e;color:transparent;padding:2px 3px}
 .blackout-fill{color:var(--ink);padding:2px 3px}
 .blackout-field{position:relative;flex:1;min-height:0;background:#000;overflow:hidden;touch-action:none}
 .blackout-viewport{background:#fff;position:absolute;top:0;right:0;bottom:0;left:0;overflow:hidden;clip-path:inset(100%);-webkit-clip-path:inset(100%);pointer-events:none}
@@ -22,7 +22,7 @@
 .blackout-text span{display:inline;white-space:normal;line-height:inherit}
 .blackout-text span.target{color:#000;text-decoration:none}
 .blackout-lens{position:absolute;border:0;pointer-events:none}
-.blackout-lens::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(181,139,0,.76) 0%,rgba(218,177,0,.8) 88%,rgba(255,226,38,.9) 100%);box-shadow:inset -2px 0 0 #ffe926;transform:scaleX(0);transform-origin:left center;pointer-events:none}
+.blackout-lens::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,119,255,.72) 0%,rgba(0,166,255,.78) 88%,rgba(38,213,255,.9) 100%);box-shadow:inset -2px 0 0 #26d5ff;transform:scaleX(0);transform-origin:left center;pointer-events:none}
 .blackout-lens.settling::after{animation:blackout-dwell 1.1s linear both}
 @keyframes blackout-dwell{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .blackout-lens:focus-visible{outline:0}
@@ -66,8 +66,8 @@
 .blackout-memory{position:relative;isolation:isolate;overflow:hidden}
 .blackout-memory .poem-pictures{position:absolute;inset:0;z-index:0;display:block;min-height:0;max-height:none;padding:0;pointer-events:none}
 .blackout-memory .poem-photo-stage{position:absolute;inset:0}
-.blackout-memory .poem-photo-stage>img{object-fit:cover;filter:saturate(.35) sepia(.08) contrast(.92) brightness(.7)}
-.blackout-memory .poem-pictures::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0009,#000a 60%,#000c);pointer-events:none}
+.blackout-memory .poem-photo-stage>img{object-fit:cover;filter:saturate(.35) sepia(.08) contrast(.96) brightness(.92)}
+.blackout-memory .poem-pictures::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0006,#0007 60%,#0009);pointer-events:none}
 .blackout-memory .poem-pictures.empty::after{content:none}
 .blackout-memory .blackout-poem{position:relative;z-index:1;flex:1;width:100%;padding:48px 30px 44px;background:transparent;color:#e8e5de}
 .blackout-memory .blackout-poem p{background:#ffffff0c;text-align:left;backdrop-filter:none;-webkit-backdrop-filter:none;text-shadow:0 1px 6px #0009}
@@ -100,16 +100,30 @@
 .poem-book-heading{display:none}
 #tablet.blackout-tablet.reading-mode{background:#141513}
 #tablet.reading-mode>.blackout-work,#tablet.reading-mode>.blackout-languages,#tablet.reading-mode>.poem-title{visibility:hidden;pointer-events:none}
-#tablet.reading-mode>.blackout-memory.reading{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;height:100%;margin:0;padding:28px 40px 22px;isolation:isolate;background:#141513;color-scheme:light}
-#tablet.reading-mode .blackout-poem{flex:1;min-height:0;width:100%;max-width:820px;padding:48px 74px 64px;background:linear-gradient(90deg,#e7e0d1 0,#f2eee4 2.5%,#f4f0e7 97%,#eae3d7 100%);box-shadow:3px 3px 0 #c3bba9,6px 6px 0 #a39b8c,0 16px 42px #0006;scrollbar-color:#bfb6a3 transparent}
-#tablet.reading-mode .poem-book-heading{display:block;max-width:530px;min-height:0;margin:0 auto 38px;text-align:left;text-shadow:none;opacity:1}
+#tablet.reading-mode>.blackout-memory.reading{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;height:var(--viewport-height,100vh);margin:0;padding:28px 40px calc(48px + env(safe-area-inset-bottom,0px));isolation:isolate;background:#141513;color-scheme:light}
+#tablet.reading-mode .blackout-poem{flex:1;min-height:0;width:100%;max-width:820px;padding:clamp(80px,14vh,120px) 74px 64px;background:linear-gradient(90deg,#e7e0d1 0,#f2eee4 2.5%,#f4f0e7 97%,#eae3d7 100%);box-shadow:3px 3px 0 #c3bba9,6px 6px 0 #a39b8c,0 16px 42px #0006;scrollbar-color:#bfb6a3 transparent}
+#tablet.reading-mode .poem-book-heading{display:none}
 .poem-book-heading>span{display:block;font-family:Georgia,serif;font-size:10px;line-height:1.5;letter-spacing:.14em;color:#81796b}
 .poem-book-heading>h2{margin:14px 0 0;font:inherit;font-size:23px;font-weight:400;line-height:1.5;color:#39372f}
 #tablet.reading-mode .blackout-poem-lines{max-width:530px;margin:0 auto}
 #tablet.reading-mode .blackout-poem p{font-size:16px;line-height:1.95;margin-bottom:16px}
 #tablet.reading-mode[data-language=en] .blackout-poem p,#tablet.reading-mode[data-language=tr] .blackout-poem p{font-size:15px;line-height:1.9}
 #tablet.blackout-tablet.reading-mode .poem-finish{flex:0 0 auto;min-width:168px;min-height:48px;margin:0;padding:0 26px;border-radius:24px;background:#eeebe2;color:#282b25;font-size:14px;font-weight:600;box-shadow:0 4px 14px #0003}
-#tablet.blackout-tablet.reading-mode .poem-finish::before{content:'↶';display:inline-block;margin-right:10px;font-family:Arial,sans-serif;font-size:20px;vertical-align:-1px}
 #tablet.blackout-tablet.reading-mode .poem-finish:focus-visible{background:#fff;color:#181b16;outline:2px solid #fff;outline-offset:4px}
-@media(max-width:700px){#tablet.reading-mode>.blackout-memory.reading{padding:20px 22px;gap:18px}#tablet.reading-mode .blackout-poem{padding:36px 28px 44px}}
-@media(max-height:650px){#tablet.reading-mode>.blackout-memory.reading{padding-top:16px;padding-bottom:14px;gap:16px}#tablet.reading-mode .blackout-poem{padding-top:30px}#tablet.reading-mode .poem-book-heading{margin-bottom:26px}}
+@media(max-width:700px){#tablet.reading-mode>.blackout-memory.reading{padding:20px 22px;gap:18px}#tablet.reading-mode .blackout-poem{padding:80px 28px 44px}}
+@media(max-height:650px){#tablet.reading-mode>.blackout-memory.reading{padding-top:16px;padding-bottom:calc(36px + env(safe-area-inset-bottom,0px));gap:16px}#tablet.reading-mode .blackout-poem{padding-top:72px}}
+
+/* The projection iframe must not render the tablet editor over the film. */
+.display #tablet.blackout-tablet{display:none}
+
+/* Let the completed sentence linger, then drift out before joining the poem. */
+.blackout-sentence.dissolving{animation:sentence-dissolve 1.2s ease-in both;will-change:filter,opacity,transform}
+@keyframes sentence-dissolve{
+  0%{opacity:1;filter:blur(0);transform:translateY(0)}
+  40%{opacity:.8;filter:blur(1px);transform:translateY(-2px)}
+  100%{opacity:0;filter:blur(9px);transform:translateY(-12px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .blackout-sentence.dissolving{animation:sentence-fade .2s linear both;will-change:opacity}
+  @keyframes sentence-fade{from{opacity:1}to{opacity:0}}
+}

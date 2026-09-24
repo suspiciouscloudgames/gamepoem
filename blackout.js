@@ -95,7 +95,6 @@ export function setupBlackout({room,startConnection,send}){
     if(fills.size)send(snapshot())
   }
   function fitSentence(){
-    sentence.style.setProperty('--slot-width',`${lensWidth}px`)
     sentence.style.fontSize=''
     if(!window.matchMedia('(orientation:landscape)').matches)return
     const style=getComputedStyle(upper)
@@ -106,8 +105,6 @@ export function setupBlackout({room,startConnection,send}){
   function sizeLens(){
     lensWidth=Math.min(lensWidth,field.clientWidth)
     lensHeight=Math.ceil(parseFloat(getComputedStyle(text).fontSize)*1.6+6)
-    sentence.style.setProperty('--slot-width',`${lensWidth}px`)
-    sentence.style.setProperty('--slot-height',`${lensHeight}px`)
   }
 
   function paint(){
@@ -151,11 +148,18 @@ export function setupBlackout({room,startConnection,send}){
   }
   function scheduleCompletion(){
     clearTimeout(completionTimer)
-    completionTimer=setTimeout(()=>{if(!document.hidden)finishCompletion()},1500)
+    sentence.classList.remove('dissolving')
+    completionTimer=setTimeout(()=>{
+      if(document.hidden||!pendingCompletion)return
+      sentence.classList.add('dissolving')
+      const duration=window.matchMedia('(prefers-reduced-motion:reduce)').matches?200:1200
+      completionTimer=setTimeout(()=>{if(!document.hidden)finishCompletion()},duration)
+    },3000)
   }
   function finishCompletion(){
     if(!pendingCompletion)return
     clearTimeout(completionTimer);completionTimer=null;pendingCompletion=false
+    sentence.classList.remove('dissolving')
     reorder.cancel();recordLine();send(snapshot())
     if(!ending&&index<deck.length-1){
       current=prompts.byId.get(deck[++index].id);selected=null
@@ -197,7 +201,6 @@ export function setupBlackout({room,startConnection,send}){
     lensWidth=Math.min(width,sentence.clientWidth,Math.max(44,bestRect?Math.ceil(2*Math.max(cx-bestRect.left,bestRect.right-cx)+12):116))
     left=Math.max(0,Math.min(width-lensWidth,cx-lensWidth/2))
     x=left/Math.max(1,width-lensWidth)
-    sentence.style.setProperty('--slot-width',`${lensWidth}px`)
     lens.style.cssText=`left:${left}px;top:${top}px;width:${lensWidth}px;height:${lensHeight}px`
     viewport.style.clipPath=`inset(${top}px ${width-left-lensWidth}px ${height-top-lensHeight}px ${left}px)`
     viewport.style.webkitClipPath=viewport.style.clipPath
