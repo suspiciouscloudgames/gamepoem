@@ -1,5 +1,5 @@
-import {connectPoemEnding} from './projection-poem.js?v=touchfix1'
-import {setupBlackout} from './blackout.js?v=your-poem1'
+import {connectPoemEnding} from './projection-poem.js?v=two-projectors1'
+import {setupBlackout} from './blackout.js?v=two-projectors1'
 import {fragmentById as byId} from './blackout-content.js?v=no-gaps1'
 import {isEmission,clamp} from './interaction.js?v=portrait1'
 import {createSeaEffects} from './effects.js?v=pulmo1'
@@ -46,7 +46,7 @@ async function startConnection(options) {
   // Render the artwork before loading the network library or opening a socket.
   try {
     const [transport]=await Promise.all([
-      import('./connection.js?v=cycle20'),
+      import('./connection.js?v=two-projectors1'),
       new Promise((resolve,reject)=>{
         if(typeof window.Peer==='function'){resolve();return}
         const script=document.createElement('script')

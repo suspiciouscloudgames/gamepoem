@@ -1,7 +1,7 @@
 import {enablePoemReorder} from './poem-reorder.js?v=delete-lines1'
 import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=revised-film1'
 import {getBlackoutLocale, composeInLocale} from './blackout-locales.js?v=revised-film1'
-import {createPoemPictures} from './poem-pictures.js?v=crossfade1'
+import {createPoemPictures} from './poem-pictures.js?v=two-projectors1'
 import {canFill} from './blackout-content.js?v=phrase-snap1'
 export function setupBlackout({room,startConnection,send}){
   const tablet=document.querySelector('#tablet')
@@ -35,11 +35,13 @@ export function setupBlackout({room,startConnection,send}){
   const finishPoem=document.createElement('button');finishPoem.type='button';finishPoem.className='poem-finish';finishPoem.disabled=true
   function updateFinish(){
     finishPoem.textContent=reading?{ko:'다시 편집',en:'Edit poem',tr:'Düzenle'}[language]:{ko:'당신의 시',en:'Your poem',tr:'Senin şiirin'}[language]
-    finishPoem.setAttribute('aria-pressed',String(reading));finishPoem.disabled=!poemNodes.size
+    finishPoem.setAttribute('aria-pressed',String(reading));finishPoem.disabled=ending||!poemNodes.size
   }
   finishPoem.addEventListener('click',()=>{
+    if(ending)return
     interrupt();if(pendingCompletion)finishCompletion();reading=!reading;memory.classList.toggle('reading',reading);updateFinish();poem.scrollTop=0
     poemNodes.forEach(line=>{line.tabIndex=reading?-1:0})
+    token=`blackout-${Date.now()}-${Math.random().toString(36).slice(2)}`;send(snapshot())
   })
   const poemNodes=new Map()
   let lineSequence=0
@@ -57,7 +59,7 @@ export function setupBlackout({room,startConnection,send}){
   let index=0,current=prompts.byId.get(deck[0].id),selected=null,candidate=null,timer=null,pointer=null,token='',ending=false
   let completionTimer=null,pendingCompletion=false
   let x=.5,y=.12,lensWidth=116,lensHeight=36,geometry=[],lineCenters=[],activeLine=-1,candidateKey=null
-  const snapshot=()=>poemNodes.size?[{kind:'poem',token,language,lines:[...poemLines.children].map(node=>node.dataset.sentenceId),fills:[...poemLines.children].map(node=>({sentenceId:node.dataset.sentenceId,answerId:node.dataset.answerId,lineId:node.dataset.lineId}))}]:[]
+  const snapshot=()=>poemNodes.size?[{kind:'poem',token,language,finalized:reading,lines:[...poemLines.children].map(node=>node.dataset.sentenceId),fills:[...poemLines.children].map(node=>({sentenceId:node.dataset.sentenceId,answerId:node.dataset.answerId,lineId:node.dataset.lineId}))}]:[]
   const reorder=enablePoemReorder(poemLines,poem,{disabled:()=>ending||reading,onStart:cancel,onChange:()=>{
     token=`blackout-${Date.now()}-${Math.random().toString(36).slice(2)}`;send(snapshot())
   }})
@@ -255,5 +257,14 @@ export function setupBlackout({room,startConnection,send}){
   if(typeof ResizeObserver==='function')new ResizeObserver(measure).observe(field)
   document.fonts?.ready.then(measure)
   updateLanguageUI();paint();fit()
-  startConnection({display:false,room,getState:snapshot,onProgress(data){ending=data.phase==='ending';if(ending){interrupt();finishCompletion()}poemNodes.forEach(line=>line.querySelector('.poem-delete').disabled=ending);paint()}})
+  function resetCompletedPoem(data){
+    if(!reading||data.token!==token)return
+    interrupt();clearTimeout(completionTimer);pendingCompletion=false
+    fills.clear();poemNodes.clear();poemLines.textContent='';pictures.reset();lineSequence=0
+    reading=false;ending=false;memory.classList.remove('reading');poem.scrollTop=0
+    deck.splice(0,deck.length,...shuffledPrompts());index=0;current=prompts.byId.get(deck[0].id)
+    selected=null;candidate?.el.classList.remove('target');candidate=null;candidateKey=null;token=''
+    lens.classList.remove('chosen');updateFinish();paint();measure();send([])
+  }
+  startConnection({display:false,room,getState:snapshot,onControl:resetCompletedPoem,onProgress(data){ending=data.phase==='ending';if(ending){interrupt();finishCompletion()}updateFinish();poemNodes.forEach(line=>line.querySelector('.poem-delete').disabled=ending);paint()}})
 }

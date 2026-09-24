@@ -62,5 +62,5 @@ export function createPoemPictures(host){
     }
     if(last)show(last)
   }
-  return {setLanguage(code){language=code;gallery.setAttribute('aria-label',labels()[0]);stage.querySelectorAll('img').forEach(img=>img.alt=labels()[2])},reveal(id){if(entries.has(id))return;entries.set(id,{id});void populate()}}
+  return {reset(){active=null;entries.clear();stage.textContent='';gallery.classList.add('empty')},setLanguage(code){language=code;gallery.setAttribute('aria-label',labels()[0]);stage.querySelectorAll('img').forEach(img=>img.alt=labels()[2])},reveal(id){if(entries.has(id))return;entries.set(id,{id});void populate()}}
 }

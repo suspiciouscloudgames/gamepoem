@@ -8,7 +8,7 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
   let peer=null,upstream=null,retry=null,closed=false,generation=0,isHost=false,follower=false
   let lastAck=0,lastUpstreamAck=0,openedAt=0,lastAttempt=0,revision=0,latest=null,localState=null
   const clients=new Set()
-  let latestProgress=null,progressRevision=0
+  let latestProgress=null,latestControl=null,progressRevision=0
   const packet=(type,extra={})=>({app:'gamepoem-v2',type,sender,role,...extra})
   const send=(conn,data)=>{try{if(conn?.open)conn.send(data)}catch{}}
   const fresh=data=>data&&Date.now()-data.changedAt<(data.items?.some(item=>item.kind==='poem')?1800000:95000)
@@ -22,6 +22,7 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
   function sync(conn) {
     const data=display?latest:localState
     if(fresh(data))send(conn,data)
+    if(latestControl)send(conn,latestControl)
     if(latestProgress&&Date.now()-latestProgress.sentAt<6000)send(conn,latestProgress)
   }
   function receive(data,conn) {
@@ -39,7 +40,7 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
     if(data.type==='cycle'&&data.role==='display'&&typeof data.token==='string'&&typeof data.eventId==='string'){
       if(seenControls.has(data.eventId))return
       seenControls.add(data.eventId);if(seenControls.size>100)seenControls.delete(seenControls.values().next().value)
-      onControl?.(data)
+      latestControl=data;onControl?.(data)
       channel?.postMessage(data)
       if(isHost)clients.forEach(client=>{if(client!==conn)send(client,data)})
       else if(conn!==upstream)send(upstream,data)
@@ -146,5 +147,5 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
     const data=packet('progress',{progress:Math.max(0,Math.min(1,progress)),phase,...(Number.isFinite(currentTime)&&currentTime>=0&&typeof cycle==='string'?{currentTime,cycle}:{}),sentAt:Date.now(),eventId:sender+'-progress-'+(++progressRevision)})
     latestProgress=data;seenControls.add(data.eventId);if(seenControls.size>100)seenControls.delete(seenControls.values().next().value)
     channel?.postMessage(data);clients.forEach(client=>send(client,data));send(upstream,data)
-  },completePoem(token){if(!display||closed)return;const data=packet('cycle',{token,eventId:sender+'-'+Date.now()});seenControls.add(data.eventId);channel?.postMessage(data);clients.forEach(client=>send(client,data));send(upstream,data)},close(){closed=true;++generation;clearInterval(heartbeat);clearTimeout(retry);channel?.close();peer?.destroy();window.removeEventListener('online',resume);document.removeEventListener('visibilitychange',visible)}}
+  },completePoem(token){if(!display||closed)return;const data=packet('cycle',{token,eventId:sender+'-'+Date.now()});latestControl=data;seenControls.add(data.eventId);channel?.postMessage(data);clients.forEach(client=>send(client,data));send(upstream,data)},close(){closed=true;++generation;clearInterval(heartbeat);clearTimeout(retry);channel?.close();peer?.destroy();window.removeEventListener('online',resume);document.removeEventListener('visibilitychange',visible)}}
 }
