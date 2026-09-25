@@ -3,6 +3,11 @@ import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=grammar-
 import {getBlackoutLocale, composeInLocale} from './blackout-locales.js?v=grammar-review1'
 import {createPoemPictures} from './poem-pictures.js?v=ipad-safari2'
 import {canFill} from './blackout-content.js?v=grammar-review1'
+import {turkishPrepared} from './blackout-turkish-prepared.js?v=turkish-ready1'
+const preparedTurkishLocale={...turkishPrepared,answerById:new Map(turkishPrepared.answers.map(a=>[a.id,a]))}
+const preparedTurkishPrompts={sentences:turkishPrepared.sentences,byId:new Map(turkishPrepared.sentences.map(s=>[s.id,s]))}
+const tabletLocale=language=>language==='tr'?preparedTurkishLocale:getBlackoutLocale(language)
+const tabletPrompts=language=>language==='tr'?preparedTurkishPrompts:getPromptCatalog(language)
 export function setupBlackout({room,startConnection,send}){
   const tablet=document.querySelector('#tablet')
   tablet.className='blackout-tablet running'
@@ -11,7 +16,7 @@ export function setupBlackout({room,startConnection,send}){
   try{const saved=localStorage.getItem('blackout-language');if(['tr','en','ko'].includes(saved))language=saved}catch{}
   const requestedLanguage=new URLSearchParams(location.search).get('lang')
   if(['tr','en','ko'].includes(requestedLanguage))language=requestedLanguage
-  let locale=getBlackoutLocale(language),prompts=getPromptCatalog(language)
+  let locale=tabletLocale(language),prompts=tabletPrompts(language)
   const languageBar=document.createElement('nav');languageBar.className='blackout-languages';languageBar.setAttribute('aria-label','Language')
   const languageButtons=new Map()
   for(const [code,label] of [['tr','Türkçe'],['en','English'],['ko','한국어']]){
@@ -90,7 +95,7 @@ export function setupBlackout({room,startConnection,send}){
   function changeLanguage(next){
     if(next===language)return
     // Build the next catalog before changing state so a failed switch remains retryable.
-    const nextLocale=getBlackoutLocale(next),nextPrompts=getPromptCatalog(next)
+    const nextLocale=tabletLocale(next),nextPrompts=tabletPrompts(next)
     const nextCurrent=nextPrompts.byId.get(deck[index].id)
     if(!nextCurrent)return
     interrupt();language=next;locale=nextLocale;prompts=nextPrompts;current=nextCurrent
