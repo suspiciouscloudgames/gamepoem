@@ -69,7 +69,7 @@ export function connectScreen({display,room,onState,onStatus,getState,onControl,
     if(data.type!=='state'||!display||!Array.isArray(data.items)||data.items.length>256||!Number.isFinite(data.changedAt)||!Number.isFinite(data.revision)||!fresh(data))return
     // Full snapshots are replayed on reconnection, but old ones cannot take over.
     if(latest && (data.changedAt<latest.changedAt || (data.changedAt===latest.changedAt && (data.sender<latest.sender || (data.sender===latest.sender&&data.revision<=latest.revision)))))return
-    latest=data;onState(data.items)
+    latest=data;onState(data.items,{sender:data.sender,revision:data.revision,changedAt:data.changedAt,items:data.items})
     channel?.postMessage(data)
     if(isHost)clients.forEach(client=>{if(client!==conn)send(client,data)})
     else if(conn!==upstream)send(upstream,data)

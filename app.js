@@ -28,7 +28,8 @@ function refreshLayerText() {
   }
   for(const [id,el] of layerNodes)if(!visible.has(id))el.className='layer'
 }
-function renderLayers(items) {
+function renderLayers(items,packet) {
+  if(packet&&parent!==window&&document.referrer)parent.postMessage({type:'poem-snapshot',room,packet},new URL(document.referrer).origin)
   poemEnding?.set(items)
   for(const item of items){
     if(!isEmission(item)||!['left','right'].includes(item.direction))continue
@@ -56,7 +57,7 @@ async function startConnection(options) {
   // Render the artwork before loading the network library or opening a socket.
   try {
     const [transport]=await Promise.all([
-      import('./connection.js?v=two-projectors1'),
+      import('./connection.js?v=floor-lines1'),
       new Promise((resolve,reject)=>{
         if(typeof window.Peer==='function'){resolve();return}
         const script=document.createElement('script')
