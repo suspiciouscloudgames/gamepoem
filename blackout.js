@@ -9,6 +9,8 @@ export function setupBlackout({room,startConnection,send}){
   tablet.textContent=''
   let language='ko'
   try{const saved=localStorage.getItem('blackout-language');if(['tr','en','ko'].includes(saved))language=saved}catch{}
+  const requestedLanguage=new URLSearchParams(location.search).get('lang')
+  if(['tr','en','ko'].includes(requestedLanguage))language=requestedLanguage
   let locale=getBlackoutLocale(language),prompts=getPromptCatalog(language)
   const languageBar=document.createElement('nav');languageBar.className='blackout-languages';languageBar.setAttribute('aria-label','Language')
   const languageButtons=new Map()
@@ -18,6 +20,8 @@ export function setupBlackout({room,startConnection,send}){
       if(event.pointerType!=='touch'&&event.pointerType!=='pen')return
       event.preventDefault();changeLanguage(code)
     })
+    // iPad Safari can deliver Touch Events without a matching Pointer/click sequence.
+    button.addEventListener('touchend',event=>{event.preventDefault();changeLanguage(code)},{passive:false})
     button.addEventListener('click',()=>changeLanguage(code));languageBar.append(button);languageButtons.set(code,button)
   }
   tablet.append(languageBar)
@@ -100,6 +104,8 @@ export function setupBlackout({room,startConnection,send}){
     updateLanguageUI();paint();measure()
     if(pendingCompletion)scheduleCompletion()
     try{localStorage.setItem('blackout-language',language)}catch{}
+    const languageURL=new URL(location.href);languageURL.searchParams.set('lang',language)
+    history.replaceState(null,'',languageURL)
     if(fills.size)send(snapshot())
   }
   function fitSentence(){
