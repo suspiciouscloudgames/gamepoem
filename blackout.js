@@ -14,6 +14,10 @@ export function setupBlackout({room,startConnection,send}){
   const languageButtons=new Map()
   for(const [code,label] of [['tr','Türkçe'],['en','English'],['ko','한국어']]){
     const button=document.createElement('button');button.type='button';button.textContent=label;button.lang=code
+    button.addEventListener('pointerup',event=>{
+      if(event.pointerType!=='touch'&&event.pointerType!=='pen')return
+      event.preventDefault();changeLanguage(code)
+    })
     button.addEventListener('click',()=>changeLanguage(code));languageBar.append(button);languageButtons.set(code,button)
   }
   tablet.append(languageBar)
@@ -81,8 +85,11 @@ export function setupBlackout({room,startConnection,send}){
   }
   function changeLanguage(next){
     if(next===language)return
-    interrupt();language=next;locale=getBlackoutLocale(language);prompts=getPromptCatalog(language)
-    current=prompts.byId.get(deck[index].id)
+    // Build the next catalog before changing state so a failed switch remains retryable.
+    const nextLocale=getBlackoutLocale(next),nextPrompts=getPromptCatalog(next)
+    const nextCurrent=nextPrompts.byId.get(deck[index].id)
+    if(!nextCurrent)return
+    interrupt();language=next;locale=nextLocale;prompts=nextPrompts;current=nextCurrent
     selected=fills.has(current.id)?locale.answerById.get(fills.get(current.id)):null
     candidate=null;candidateKey=null;activeLine=-1;geometry=[];lineCenters=[];nodes.length=0;text.textContent=''
     appendRanges(text,locale.passages)

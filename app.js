@@ -1,5 +1,5 @@
 import {connectPoemEnding} from './projection-poem.js?v=grammar-review1'
-import {setupBlackout} from './blackout.js?v=grammar-review1'
+import {setupBlackout} from './blackout.js?v=language-touch1'
 import {fragmentById as byId} from './blackout-content.js?v=grammar-review1'
 import {isEmission,clamp} from './interaction.js?v=portrait1'
 import {createSeaEffects} from './effects.js?v=pulmo1'

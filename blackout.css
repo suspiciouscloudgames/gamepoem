@@ -6,8 +6,8 @@
  font-family:var(--reading-font);font-weight:400;font-synthesis:none;-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;
 }
 #tablet[data-language=en],#tablet[data-language=tr]{--reading-font:Georgia,'Times New Roman',serif}
-.blackout-languages{grid-column:1;grid-row:1;display:flex;align-items:center;justify-content:flex-start;gap:4px;font-family:var(--reading-font);border:0;box-shadow:none;background:transparent}
-.blackout-languages button{min-height:34px;min-width:0;padding:0 12px;border:0;border-radius:24px;box-shadow:none;text-decoration:none;font-size:14px;font-weight:400;letter-spacing:.015em;color:#99978f;background:transparent;white-space:nowrap;transition:background-color .2s,color .2s}
+.blackout-languages{position:relative;z-index:2;grid-column:1;grid-row:1;display:flex;align-items:center;justify-content:flex-start;gap:4px;font-family:var(--reading-font);border:0;box-shadow:none;background:transparent}
+.blackout-languages button{min-height:44px;touch-action:manipulation;min-width:0;padding:0 12px;border:0;border-radius:24px;box-shadow:none;text-decoration:none;font-size:14px;font-weight:400;letter-spacing:.015em;color:#99978f;background:transparent;white-space:nowrap;transition:background-color .2s,color .2s}
 .blackout-languages button[lang=ko]{font-family:'Nanum Myeongjo',serif}
 .blackout-languages button[lang=tr],.blackout-languages button[lang=en]{font-family:Georgia,'Times New Roman',serif}
 #tablet.blackout-tablet .blackout-languages button[aria-pressed=true]{color:var(--ink);background:#30312d}
