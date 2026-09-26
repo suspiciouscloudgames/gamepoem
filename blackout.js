@@ -1,3 +1,4 @@
+import {installTabletTouchGuard,tabletViewportHeight} from './tablet-touch.js?v=1'
 import {createEndingNotice} from './ending-notice.js?v=1'
 import {enablePoemReorder} from './poem-reorder.js?v=touch-recovery2'
 import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=grammar-review1'
@@ -339,10 +340,11 @@ export function setupBlackout({room,startConnection,send}){
     if(delta){e.preventDefault();x=Math.max(0,Math.min(1,x+delta[0]));y=Math.max(0,Math.min(1,y+delta[1]));locate(true)}
     else if(!e.repeat&&(e.key==='Enter'||e.key===' ')){e.preventDefault();cancel();commit()}
   })
-  function fit(){interrupt();document.documentElement.style.setProperty('--viewport-height',`${Math.round(window.visualViewport?.height||innerHeight)}px`);requestAnimationFrame(measure)}
+  function fit(){interrupt();document.documentElement.style.setProperty('--viewport-height',`${tabletViewportHeight()}px`);requestAnimationFrame(measure)}
   window.addEventListener('resize',fit);window.visualViewport?.addEventListener('resize',fit)
   if(typeof ResizeObserver==='function')new ResizeObserver(measure).observe(field)
   document.fonts?.ready.then(measure)
+  installTabletTouchGuard(interrupt)
   updateLanguageUI();paint();fit()
   function resetPoem(){
     interrupt();clearTimeout(completionTimer);completionTimer=null;pendingCompletion=false

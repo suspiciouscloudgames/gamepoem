@@ -1,3 +1,5 @@
+/* Keep vertical scrolling, exclude browser pinch/double-tap zoom across the kiosk. */
+html.tablet-kiosk,html.tablet-kiosk body{touch-action:pan-y}
 /* Landscape iPad 8: warm charcoal, ivory paper, and regular-weight serif type. */
 #tablet.blackout-tablet{
  --selection-ink:rgba(58,144,161,.88);--paper:#1b1c1a;--page:#f2efe6;--ink:#e1ded5;--page-ink:#373831;--reading-font:'Nanum Myeongjo',serif;
