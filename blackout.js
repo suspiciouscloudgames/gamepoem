@@ -1,3 +1,4 @@
+import {createTabletUpdater} from './tablet-update.js?v=1'
 import {installTabletTouchGuard,tabletViewportHeight} from './tablet-touch.js?v=1'
 import {createEndingNotice} from './ending-notice.js?v=1'
 import {enablePoemReorder} from './poem-reorder.js?v=touch-recovery2'
@@ -356,6 +357,7 @@ export function setupBlackout({room,startConnection,send}){
     x=.5;y=.12;touchPoint=null;windowBox=null;visualX=0;visualY=0;activeLine=-1
     lens.classList.remove('chosen');updateFinish();paint();measure();send([])
   }
+  const updater=createTabletUpdater({canReload:()=>!ending&&!reading&&!pendingCompletion&&pointer===null&&!poemNodes.size})
   let lastCycle=null,sawEnding=false,resetDuringEnding=false
   startConnection({display:false,room,getState:snapshot,
     onControl(data){
@@ -373,10 +375,11 @@ export function setupBlackout({room,startConnection,send}){
         sawEnding=false;resetDuringEnding=false
       }
       if(cycle!==null)lastCycle=cycle
-      if(data.phase==='ending'){sawEnding=true;ending=true;interrupt();finishCompletion()}
+      if(data.phase==='ending'){if(!sawEnding)void updater.check();sawEnding=true;ending=true;interrupt();finishCompletion()}
       else ending=sawEnding&&!resetDuringEnding
       updateFinish()
       poemNodes.forEach(line=>line.querySelector('.poem-delete').disabled=ending)
+      if(restarted)updater.atRestart()
     }
   })
 }
