@@ -1,3 +1,4 @@
+import {createEndingNotice} from './ending-notice.js?v=1'
 import {enablePoemReorder} from './poem-reorder.js?v=touch-recovery2'
 import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=grammar-review1'
 import {getBlackoutLocale, composeInLocale} from './blackout-locales.js?v=grammar-review1'
@@ -12,6 +13,7 @@ export function setupBlackout({room,startConnection,send}){
   const tablet=document.querySelector('#tablet')
   tablet.className='blackout-tablet running'
   tablet.textContent=''
+  const endingNotice=createEndingNotice(tablet)
   let language='ko'
   try{const saved=localStorage.getItem('blackout-language');if(['tr','en','ko'].includes(saved))language=saved}catch{}
   const requestedLanguage=new URLSearchParams(location.search).get('lang')
@@ -50,6 +52,7 @@ export function setupBlackout({room,startConnection,send}){
   let reading=false,editorScrollTop=0
   const finishPoem=document.createElement('button');finishPoem.type='button';finishPoem.className='poem-finish';finishPoem.disabled=true
   function updateFinish(){
+    endingNotice.update(ending,language)
     tablet.classList.toggle('reading-mode',reading)
     bookTitle.textContent={ko:'읽기',en:'Read',tr:'Oku'}[language]
     finishPoem.textContent=reading?{ko:'다시 편집',en:'Edit again',tr:'Yeniden düzenle'}[language]:{ko:'읽기',en:'Read',tr:'Oku'}[language]
@@ -341,14 +344,37 @@ export function setupBlackout({room,startConnection,send}){
   if(typeof ResizeObserver==='function')new ResizeObserver(measure).observe(field)
   document.fonts?.ready.then(measure)
   updateLanguageUI();paint();fit()
-  function resetCompletedPoem(data){
-    if(!reading||data.token!==token)return
-    interrupt();clearTimeout(completionTimer);pendingCompletion=false
+  function resetPoem(){
+    interrupt();clearTimeout(completionTimer);completionTimer=null;pendingCompletion=false
+    sentence.classList.remove('dissolving')
     fills.clear();poemNodes.clear();poemLines.textContent='';pictures.reset();lineSequence=0
     reading=false;ending=false;memory.classList.remove('reading');poem.scrollTop=0
     deck.splice(0,deck.length,...shuffledPrompts());index=0;current=prompts.byId.get(deck[0].id)
     selected=null;candidate?.el.classList.remove('target');candidate=null;candidateKey=null;token=''
+    x=.5;y=.12;touchPoint=null;windowBox=null;visualX=0;visualY=0;activeLine=-1
     lens.classList.remove('chosen');updateFinish();paint();measure();send([])
   }
-  startConnection({display:false,room,getState:snapshot,onControl:resetCompletedPoem,onProgress(data){ending=data.phase==='ending';if(ending){interrupt();finishCompletion()}updateFinish();poemNodes.forEach(line=>line.querySelector('.poem-delete').disabled=ending)}})
+  let lastCycle=null,sawEnding=false,resetDuringEnding=false
+  startConnection({display:false,room,getState:snapshot,
+    onControl(data){
+      if(!token||data.token!==token)return
+      resetPoem()
+      if(sawEnding)resetDuringEnding=true
+    },
+    onProgress(data){
+      const cycle=typeof data.cycle==='string'?data.cycle:null
+      const newCycle=cycle!==null&&lastCycle!==null&&cycle!==lastCycle
+      // Restart also clears unfinished poems. Cycle IDs cover reconnects that missed the ending.
+      const restarted=(sawEnding&&data.phase==='playing')||(newCycle&&data.phase!=='ending')
+      if(restarted){
+        if(!resetDuringEnding)resetPoem()
+        sawEnding=false;resetDuringEnding=false
+      }
+      if(cycle!==null)lastCycle=cycle
+      if(data.phase==='ending'){sawEnding=true;ending=true;interrupt();finishCompletion()}
+      else ending=sawEnding&&!resetDuringEnding
+      updateFinish()
+      poemNodes.forEach(line=>line.querySelector('.poem-delete').disabled=ending)
+    }
+  })
 }

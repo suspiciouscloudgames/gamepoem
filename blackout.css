@@ -1,6 +1,6 @@
 /* Landscape iPad 8: warm charcoal, ivory paper, and regular-weight serif type. */
 #tablet.blackout-tablet{
- --paper:#1b1c1a;--page:#f2efe6;--ink:#e1ded5;--page-ink:#373831;--reading-font:'Nanum Myeongjo',serif;
+ --selection-ink:rgba(58,144,161,.88);--paper:#1b1c1a;--page:#f2efe6;--ink:#e1ded5;--page-ink:#373831;--reading-font:'Nanum Myeongjo',serif;
  padding:24px 32px 32px;color-scheme:dark;background:var(--paper);color:var(--ink);
  display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);grid-template-rows:44px minmax(0,1fr);gap:20px 36px;
  font-family:var(--reading-font);font-weight:400;font-synthesis:none;-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;
@@ -23,14 +23,14 @@
 .blackout-text span.phrase-unit,.blackout-text span.phrase-unit span{white-space:nowrap}
 .blackout-text span.target{color:var(--page-ink);text-decoration:none}
 .blackout-lens{position:absolute;z-index:1;border:0;pointer-events:none}
-.blackout-lens::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(90deg,rgba(64,160,178,.32) 0%,rgba(88,182,196,.44) 88%,rgba(136,211,219,.54) 100%);box-shadow:inset -2px 0 0 rgba(58,144,161,.88);transform:scaleX(0);transform-origin:left center;pointer-events:none}
+.blackout-lens::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(90deg,rgba(64,160,178,.32) 0%,rgba(88,182,196,.44) 88%,rgba(136,211,219,.54) 100%);box-shadow:inset -1px 0 0 var(--selection-ink);transform:scaleX(0);transform-origin:left center;pointer-events:none}
 .blackout-lens.settling::after{animation:blackout-dwell 1.1s linear both}
 @keyframes blackout-dwell{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.blackout-lens:focus-visible{outline:0}
+.blackout-lens:focus,.blackout-lens:focus-visible{outline:1px solid var(--selection-ink);outline-offset:0}
 .blackout-memory{grid-column:2;grid-row:2;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--paper)}
 .blackout-poem{flex:1;min-width:0;min-height:0;padding:26px 12px 32px;overflow-y:auto;overflow-x:hidden;color:#c9c7bf;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#383836 transparent}
 .blackout-poem-lines{width:100%;margin:0;text-align:left}
-.blackout-poem p{margin:0 0 4px;padding:5px 12px;border-radius:3px;background:transparent;cursor:grab;touch-action:none;font-size:14px;line-height:1.75;letter-spacing:0;word-break:keep-all;overflow-wrap:anywhere}
+.blackout-poem p{margin:0 0 4px;padding:5px 12px;border-radius:3px;background:transparent;cursor:grab;touch-action:none;font-size:15px;line-height:1.75;letter-spacing:0;word-break:keep-all;overflow-wrap:anywhere}
 .blackout-poem p:last-child{margin-bottom:0}
 .blackout-poem p.current{color:var(--ink)}
 .blackout-poem:focus-visible{outline:0;background:#090909}
@@ -40,7 +40,7 @@
 .poem-photo-stage>img.arriving{animation:photo-appear 1.4s ease-in-out both}
 #tablet[data-language=en] .blackout-sentence,#tablet[data-language=tr] .blackout-sentence{font-size:19px;line-height:1.6;letter-spacing:0;word-break:normal}
 #tablet[data-language=en] .blackout-text,#tablet[data-language=tr] .blackout-text{font-size:17px;line-height:2.05;word-break:normal}
-#tablet[data-language=en] .blackout-poem p,#tablet[data-language=tr] .blackout-poem p{font-size:13px;line-height:1.75;letter-spacing:0;word-break:normal}
+#tablet[data-language=en] .blackout-poem p,#tablet[data-language=tr] .blackout-poem p{font-size:14px;line-height:1.75;letter-spacing:0;word-break:normal}
 @keyframes photo-appear{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.poem-photo-stage>img.arriving{animation:none}}
 @media(min-width:1200px){#tablet.blackout-tablet{padding:24px 40px 36px;column-gap:40px}.blackout-upper{padding-right:36px;padding-left:36px}}
@@ -55,7 +55,8 @@
 
 #tablet.blackout-tablet button:focus-visible{outline:0;background-color:#1d1d1b}
 
-.blackout-poem p:focus-visible{outline:0;background:#292926}
+.blackout-poem p:focus,.blackout-poem p:focus-visible{outline:0;box-shadow:inset 0 0 0 1px var(--selection-ink)}
+.blackout-poem p:focus-visible{background:#292926}
 .blackout-poem p.poem-placeholder{color:transparent;background:#0c0c0c}
 .blackout-poem p.poem-drag-ghost{box-sizing:border-box;z-index:1000;pointer-events:none;cursor:grabbing;box-shadow:0 16px 40px #000b;background:#292926;margin:0;opacity:.97}
 
@@ -128,3 +129,16 @@
   .blackout-sentence.dissolving{animation:sentence-fade .2s linear both;will-change:opacity}
   @keyframes sentence-fade{from{opacity:1}to{opacity:0}}
 }
+
+/* The shared screen is now showing the audience's poem. */
+.ending-notice{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:24px;background:rgba(12,15,14,.76);color:#f2efe6;font-family:Georgia,'Times New Roman',serif;touch-action:none}
+.ending-notice[hidden]{display:none}
+.ending-notice:lang(ko){font-family:'Nanum Myeongjo',serif}
+.ending-notice-card{position:relative;width:min(820px,100%);max-height:100%;min-height:min(547px,calc(100vh - 96px));overflow:auto;padding:72px 38px 72px 52px;display:flex;flex-direction:column;justify-content:center;text-align:center;color:#373831;border:1px solid #d2cbb9;border-radius:2px 5px 5px 2px;background:linear-gradient(90deg,#d4cdbb 0,#e5dfcf 8px,#f2efe6 26px,#f7f4eb 65px,#f2efe6 100%);box-shadow:3px 3px 0 #d8d1c1,5px 5px 0 #eee9dc,7px 7px 0 #c5bdab,0 28px 80px #0007;outline:none;animation:ending-notice-enter .5s ease-out both}
+.ending-notice-card:before{content:'';position:absolute;left:19px;top:0;bottom:0;width:1px;background:#b8ae9433}
+.ending-notice-card h2{margin:0;font-size:clamp(28px,3.35vw,35px);line-height:1.65;font-weight:400;letter-spacing:-.02em;word-break:normal;overflow-wrap:break-word;text-wrap:balance}
+.ending-notice:lang(ko) h2{word-break:keep-all}
+.ending-notice-card p{margin:22px 0 0;color:#747064;font-size:25px;line-height:1.8;font-weight:400;word-break:keep-all;overflow-wrap:break-word;text-wrap:balance}
+@keyframes ending-notice-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.ending-notice-card{min-height:330px;padding:58px 28px 54px 38px}.ending-notice-card p{font-size:22px}}
+@media(prefers-reduced-motion:reduce){.ending-notice-card{animation:none}}
