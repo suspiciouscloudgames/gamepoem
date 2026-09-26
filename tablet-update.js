@@ -28,13 +28,23 @@ export function createTabletUpdater({canReload}){
       const html=new DOMParser().parseFromString(await response.text(),'text/html')
       const version=html.querySelector('meta[name="tablet-release"]')?.content
       if(!version||version===current||!/^[a-zA-Z0-9._-]{1,80}$/.test(version)){pending=null;return}
-      // Verify the new page's entry assets are available before leaving a working page.
+      // Check module dependencies too: a successful entry file alone cannot boot the app.
+      const verified=new Set()
+      async function verifyAsset(asset,module=false){
+        if(asset.origin!==location.origin)throw new Error('Unexpected external release asset')
+        if(verified.has(asset.href))return
+        if(verified.size>=80)throw new Error('Release asset graph too large')
+        verified.add(asset.href)
+        const result=await fetch(asset,{cache:'reload',signal:controller.signal})
+        if(!result.ok||/text\/html/i.test(result.headers.get('content-type')||''))throw new Error('Release asset unavailable')
+        const source=await result.text()
+        if(!module)return
+        const imports=[...source.matchAll(/\b(?:import|export)\s+(?:[^'";]*?\s+from\s*)?['"]([^'"]+)['"]/g),...source.matchAll(/\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g)]
+        await Promise.all(imports.map(match=>verifyAsset(new URL(match[1],asset),true)))
+      }
       for(const node of html.querySelectorAll('script[type="module"][src],link[rel="stylesheet"][href]')){
         const asset=new URL(node.getAttribute('src')||node.getAttribute('href'),url)
-        if(asset.origin!==location.origin)continue
-        const result=await fetch(asset,{cache:'reload',signal:controller.signal})
-        if(!result.ok)return
-        await result.arrayBuffer()
+        await verifyAsset(asset,node.tagName==='SCRIPT')
       }
       pending=version;verifiedAt=Date.now();apply()
     }catch{

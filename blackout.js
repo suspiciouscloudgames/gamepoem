@@ -1,5 +1,5 @@
-import {createTabletUpdater} from './tablet-update.js?v=1'
-import {installTabletTouchGuard,tabletViewportHeight} from './tablet-touch.js?v=1'
+import {createTabletUpdater} from './tablet-update.js?v=2'
+import {installTabletTouchGuard,tabletViewportHeight} from './tablet-touch.js?v=2'
 import {createEndingNotice} from './ending-notice.js?v=1'
 import {enablePoemReorder} from './poem-reorder.js?v=touch-recovery2'
 import {getPromptCatalog,shuffledPrompts} from './blackout-prompts.js?v=grammar-review1'
