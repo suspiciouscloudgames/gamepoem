@@ -239,7 +239,7 @@ export function setupBlackout({room,startConnection,send}){
   }
   function measure(){
     fitSentence();sizeLens()
-    cancel();text.style.transform='none'
+    cancel();text.style.left='0px';text.style.top='0px'
     const base=text.getBoundingClientRect()
     geometry=nodes.map(node=>({node,rects:[...node.el.getClientRects()].map(r=>({left:r.left-base.left,top:r.top-base.top,right:r.right-base.left,bottom:r.bottom-base.top}))}))
     // Measure every text line, including lines with no acceptable answer.
@@ -296,9 +296,9 @@ export function setupBlackout({room,startConnection,send}){
     visualX=fromX+(targetX-fromX)*ease;visualY=fromY+(targetY-fromY)*ease
     const visibleLeft=left+visualX,visibleTop=top+visualY
     lens.style.cssText=`left:${visibleLeft}px;top:${visibleTop}px;width:${lensWidth}px;height:${lensHeight}px`
-    viewport.style.clipPath=`inset(${visibleTop}px ${Math.max(0,width-visibleLeft-lensWidth)}px ${Math.max(0,height-visibleTop-lensHeight)}px ${visibleLeft}px)`
-    viewport.style.webkitClipPath=viewport.style.clipPath
-    text.style.transform=`translate(${visualX}px,${visualY-scroll}px)`
+    // Rectangular clipping avoids a composited polygon mask on iPad Safari.
+    viewport.style.clip=`rect(${visibleTop}px,${visibleLeft+lensWidth}px,${visibleTop+lensHeight}px,${visibleLeft}px)`
+    text.style.left=`${visualX}px`;text.style.top=`${visualY-scroll}px`
   }
   function animateLift(now){
     lift=Math.min(1,(now-liftStart)/180);renderWindow()

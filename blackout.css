@@ -17,8 +17,8 @@
 .blackout-blank{width:auto;height:auto;min-width:0;max-width:100%;display:inline-block;white-space:nowrap;line-height:1.25;vertical-align:middle;overflow:hidden;background:#30312d;color:transparent;padding:2px 3px}
 .blackout-fill{color:var(--ink);padding:2px 3px}
 .blackout-field{position:relative;flex:1;min-height:0;background:var(--paper);overflow:hidden;touch-action:none;isolation:isolate}
-.blackout-viewport{z-index:0;background:var(--page);position:absolute;top:0;right:0;bottom:0;left:0;overflow:hidden;clip-path:inset(100%);-webkit-clip-path:inset(100%);pointer-events:none}
-.blackout-text{padding:32px 26px 96px;background:var(--page);color:var(--page-ink);font-weight:400;font-size:18px;line-height:2.1;letter-spacing:0;word-spacing:normal;text-align:left;word-break:keep-all;overflow-wrap:anywhere;will-change:transform}
+.blackout-viewport{z-index:0;background:var(--page);position:absolute;top:0;right:0;bottom:0;left:0;overflow:hidden;clip:rect(0px,0px,0px,0px);pointer-events:none}
+.blackout-text{padding:32px 26px 96px;background:var(--page);color:var(--page-ink);font-weight:400;font-size:18px;line-height:2.1;letter-spacing:0;word-spacing:normal;text-align:left;word-break:keep-all;overflow-wrap:anywhere;position:relative}
 .blackout-text span{display:inline;white-space:normal;line-height:inherit}
 .blackout-text span.phrase-unit,.blackout-text span.phrase-unit span{white-space:nowrap}
 .blackout-text span.target{color:var(--page-ink);text-decoration:none}
